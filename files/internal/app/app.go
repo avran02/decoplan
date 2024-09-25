@@ -9,7 +9,7 @@ import (
 	"github.com/avran02/decoplan/files/internal/controller"
 	"github.com/avran02/decoplan/files/internal/server"
 	"github.com/avran02/decoplan/files/internal/service"
-	"github.com/avran02/decoplan/users/pb"
+	"github.com/avran02/decoplan/files/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"

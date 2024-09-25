@@ -10,7 +10,7 @@ import (
 
 	"github.com/avran02/decoplan/files/internal/config"
 	"github.com/avran02/decoplan/files/internal/dto"
-	"github.com/avran02/decoplan/users/pb"
+	"github.com/avran02/decoplan/files/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/minio/minio-go/v7"
@@ -145,6 +145,7 @@ func (s *filesService) createBucketIfNotExists(ctx context.Context, bucketName s
 }
 
 func New(conf config.Minio) FilesService {
+	slog.Info("initializing service")
 	minioClient, err := minio.New(conf.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(conf.AccessKey, conf.SecretKey, ""),
 		Region: config.DefaultLocation,

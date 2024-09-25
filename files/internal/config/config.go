@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"log/slog"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -26,12 +28,13 @@ type Server struct {
 
 func New() *Config {
 	if os.Getenv("LOAD_DOT_ENV") != "false" {
+		slog.Info("Loading .env file")
 		if err := godotenv.Load(); err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	return &Config{
+	config := &Config{
 		Minio: Minio{
 			Endpoint:  os.Getenv("MINIO_ENDPOINT"),
 			AccessKey: os.Getenv("MINIO_ACCESS_KEY"),
@@ -43,4 +46,7 @@ func New() *Config {
 			Host:     os.Getenv("SERVER_HOST"),
 		},
 	}
+	slog.Debug(fmt.Sprintf("config: %+v", config))
+
+	return config
 }

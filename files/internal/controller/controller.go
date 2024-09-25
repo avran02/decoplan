@@ -10,7 +10,7 @@ import (
 	"github.com/avran02/decoplan/files/internal/config"
 	"github.com/avran02/decoplan/files/internal/dto"
 	"github.com/avran02/decoplan/files/internal/service"
-	"github.com/avran02/decoplan/users/pb"
+	"github.com/avran02/decoplan/files/pb"
 )
 
 type FileServerController interface {
@@ -187,6 +187,7 @@ func (c fileServerController) asyncGetFileFromGrpcStream(stream pb.FileService_U
 }
 
 func New(service service.FilesService) FileServerController {
+	slog.Info("initializing controller")
 	return fileServerController{
 		Service: service,
 	}

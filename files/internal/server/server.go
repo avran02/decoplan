@@ -2,9 +2,10 @@ package server
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/avran02/decoplan/files/internal/controller"
-	"github.com/avran02/decoplan/users/pb"
+	"github.com/avran02/decoplan/files/pb"
 )
 
 type FileServer struct {
@@ -33,6 +34,7 @@ func (s FileServer) RegisterUser(ctx context.Context, req *pb.RegisterUserReques
 }
 
 func New(controller controller.FileServerController) FileServer {
+	slog.Info("initializing server")
 	return FileServer{
 		UnimplementedFileServiceServer: pb.UnimplementedFileServiceServer{},
 		FileServerController:           controller,
