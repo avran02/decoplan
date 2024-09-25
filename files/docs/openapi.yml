@@ -9,7 +9,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/octet-stream:
+          multipart/form-data:
             schema:
               type: object
               properties:

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/avran02/decoplan/files/internal/config"
 	"github.com/avran02/decoplan/files/internal/dto"
 	"github.com/avran02/decoplan/files/internal/service"
 	"github.com/go-chi/chi/v5"
@@ -47,11 +48,29 @@ func (c filesController) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Функция парсит multipart/form-data. Файл имплементирует io.Reader и передаётся в service.UploadFile для сохранения в minio
+// fileExt - расширение файла, которое передаётся в запроса
 func (c filesController) UploadFile(w http.ResponseWriter, r *http.Request) {
 	slog.Info("filesController.UploadFile")
 
 	ctx := r.Context()
-	fileID, err := c.Service.UploadFile(ctx, r.Body)
+	if err := r.ParseMultipartForm(config.StreamChunkSize); err != nil {
+		err = fmt.Errorf("failed to parse multipart form: %w", err)
+		slog.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	file, fileHeader, err := r.FormFile("content")
+	if err != nil {
+		err = fmt.Errorf("failed to get file: %w", err)
+		slog.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	fileID, err := c.Service.UploadFile(ctx, file, fileHeader.Filename)
 	if err != nil {
 		err = fmt.Errorf("failed to upload file: %w", err)
 		slog.Error(err.Error())

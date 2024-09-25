@@ -2,4 +2,4 @@ package service
 
 import "errors"
 
-var ErrorBucketExists = errors.New("bucket already exists")
+var ErrNoFileExtension = errors.New("no file extension")

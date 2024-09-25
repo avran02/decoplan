@@ -7,6 +7,8 @@ import (
 	"io"
 	"log"
 	"log/slog"
+	"path/filepath"
+	"strings"
 
 	"github.com/avran02/decoplan/files/internal/config"
 	"github.com/google/uuid"
@@ -23,7 +25,7 @@ var (
 )
 
 type FilesService interface {
-	UploadFile(ctx context.Context, data io.Reader) (string, error)
+	UploadFile(ctx context.Context, data io.Reader, fileName string) (string, error)
 	DownloadFile(ctx context.Context, fileID string) (io.ReadCloser, error)
 	DeleteFile(ctx context.Context, fileID string) error
 }
@@ -32,15 +34,14 @@ type filesService struct {
 	minio *minio.Client
 }
 
-func (s *filesService) UploadFile(ctx context.Context, data io.Reader) (string, error) {
+func (s *filesService) UploadFile(ctx context.Context, data io.Reader, fileName string) (string, error) {
 	slog.Info("filesService.UploadFile")
 	if err := s.createBucketIfNotExists(ctx); err != nil {
 		return "", fmt.Errorf("failed to create bucket: %w", err)
 	}
 
-	fileID := uuid.NewString()
-	_, err := s.minio.PutObject(ctx, config.UserDataBucket, fileID, data, -1, minio.PutObjectOptions{})
-	if err != nil {
+	fileID := uuid.NewString() + getExtatension(fileName)
+	if _, err := s.minio.PutObject(ctx, config.UserDataBucket, fileID, data, -1, minio.PutObjectOptions{}); err != nil {
 		if errors.Is(err, io.EOF) {
 			return fileID, nil
 		}
@@ -95,6 +96,10 @@ func (s *filesService) createBucketIfNotExists(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func getExtatension(fileName string) string {
+	return strings.ToLower(filepath.Ext(fileName))
 }
 
 func New(conf config.Minio) FilesService {
