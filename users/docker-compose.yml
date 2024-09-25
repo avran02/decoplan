@@ -31,7 +31,7 @@ services:
       - postgres
 
   users:
-    image: users
+    image: avran02/decoplan-files
     build:
       context: .
       dockerfile: Dockerfile
