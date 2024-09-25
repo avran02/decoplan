@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: File Service API
+  version: 1.0.0
+paths:
+  /upload:
+    post:
+      summary: Upload a file
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+  /download/{id}:
+    post:
+      summary: Download a files
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the file to be downloaded
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /delete/{id}:
+    delete:
+      summary: Remove a file
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the file to be removed
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean

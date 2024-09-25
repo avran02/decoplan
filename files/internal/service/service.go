@@ -9,9 +9,7 @@ import (
 	"log/slog"
 
 	"github.com/avran02/decoplan/files/internal/config"
-	"github.com/avran02/decoplan/files/internal/dto"
-	"github.com/avran02/decoplan/files/pb"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"github.com/google/uuid"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -25,88 +23,41 @@ var (
 )
 
 type FilesService interface {
-	RegisterUser(ctx context.Context, bucketName string) error
-	ListFiles(ctx context.Context, bucketName, dir string) ([]*pb.FileInfo, error)
-	UploadFile(ctx context.Context, req *dto.UploadFileStreamRequest) error
-	DownloadFile(ctx context.Context, bucketName, filePath string) (io.ReadCloser, error)
-	RemoveFile(ctx context.Context, bucketName, filePath string) error
+	UploadFile(ctx context.Context, data io.Reader) (string, error)
+	DownloadFile(ctx context.Context, fileID string) (io.ReadCloser, error)
+	DeleteFile(ctx context.Context, fileID string) error
 }
 
 type filesService struct {
 	minio *minio.Client
 }
 
-func (s *filesService) ListFiles(ctx context.Context, bucketName string, dir string) ([]*pb.FileInfo, error) {
-	slog.Info("List files in " + dir)
-	err := s.createBucketIfNotExists(ctx, bucketName)
-	if err != nil && !errors.Is(err, ErrorBucketExists) {
-		return nil, err
+func (s *filesService) UploadFile(ctx context.Context, data io.Reader) (string, error) {
+	slog.Info("filesService.UploadFile")
+	if err := s.createBucketIfNotExists(ctx); err != nil {
+		return "", fmt.Errorf("failed to create bucket: %w", err)
 	}
 
-	objChan := s.minio.ListObjects(ctx, bucketName, minio.ListObjectsOptions{
-		Prefix:    dir,
-		Recursive: false,
-	})
-
-	files := make([]*pb.FileInfo, 0, len(objChan))
-
-	for object := range objChan {
-		if object.Err != nil {
-			slog.Error(object.Err.Error())
-			return nil, fmt.Errorf("failed to list objects:\n%w", object.Err)
-		}
-
-		files = append(files, &pb.FileInfo{
-			Name:         object.Key,
-			Size:         object.Size,
-			LastModified: timestamppb.New(object.LastModified),
-		})
-	}
-
-	return files, nil
-}
-
-func (s *filesService) RegisterUser(ctx context.Context, bucketName string) error {
-	err := s.createBucketIfNotExists(ctx, bucketName)
-	if err != nil && !errors.Is(err, ErrorBucketExists) {
-		return err
-	}
-
-	err = s.minio.MakeBucket(ctx, bucketName, makeBucketOptions)
-	if err != nil {
-		slog.Error(err.Error())
-		return fmt.Errorf("failed to create bucket: %w", err)
-	}
-
-	return nil
-}
-
-func (s *filesService) UploadFile(ctx context.Context, req *dto.UploadFileStreamRequest) error {
-	if err := s.createBucketIfNotExists(ctx, req.UserID); err != nil {
-		return err
-	}
-
-	_, err := s.minio.PutObject(ctx, req.UserID, req.FilePath, req, -1, minio.PutObjectOptions{})
+	fileID := uuid.NewString()
+	_, err := s.minio.PutObject(ctx, config.UserDataBucket, fileID, data, -1, minio.PutObjectOptions{})
 	if err != nil {
 		if errors.Is(err, io.EOF) {
-			slog.Info("closed in EOF block")
-			return nil
+			return fileID, nil
 		}
-		slog.Error(err.Error())
-		return fmt.Errorf("failed to upload file: %w", err)
+		slog.Error("failed to upload file", "fileID", fileID, "err", err)
+		return "", fmt.Errorf("failed to upload file: %w", err)
 	}
 
-	slog.Info("Uploaded file: " + req.FilePath)
-
-	return nil
+	return fileID, nil
 }
 
-func (s *filesService) DownloadFile(ctx context.Context, bucketName, filePath string) (io.ReadCloser, error) {
-	if err := s.createBucketIfNotExists(ctx, bucketName); err != nil {
+func (s *filesService) DownloadFile(ctx context.Context, fileID string) (io.ReadCloser, error) {
+	slog.Info("filesService.DownloadFile")
+	if err := s.createBucketIfNotExists(ctx); err != nil {
 		return nil, err
 	}
 
-	o, err := s.minio.GetObject(ctx, bucketName, filePath, getObjectOptions)
+	o, err := s.minio.GetObject(ctx, config.UserDataBucket, fileID, getObjectOptions)
 	if err != nil {
 		err = fmt.Errorf("failed to get object: %w", err)
 		slog.Error(err.Error())
@@ -116,16 +67,18 @@ func (s *filesService) DownloadFile(ctx context.Context, bucketName, filePath st
 	return o, nil
 }
 
-func (s *filesService) RemoveFile(ctx context.Context, bucketName, filePath string) error {
-	if err := s.createBucketIfNotExists(ctx, bucketName); err != nil {
+func (s *filesService) DeleteFile(ctx context.Context, fileID string) error {
+	slog.Info("filesService.DeleteFile")
+	if err := s.createBucketIfNotExists(ctx); err != nil {
 		return err
 	}
 
-	return s.minio.RemoveObject(ctx, bucketName, filePath, minio.RemoveObjectOptions{})
+	slog.Debug("deleting file", "fileID", fileID, "bucket", config.UserDataBucket)
+	return s.minio.RemoveObject(ctx, config.UserDataBucket, fileID, minio.RemoveObjectOptions{})
 }
 
-func (s *filesService) createBucketIfNotExists(ctx context.Context, bucketName string) error {
-	exists, err := s.minio.BucketExists(ctx, bucketName)
+func (s *filesService) createBucketIfNotExists(ctx context.Context) error {
+	exists, err := s.minio.BucketExists(ctx, config.UserDataBucket)
 	if err != nil {
 		err = fmt.Errorf("failed to check if bucket exists: %w", err)
 		slog.Error(err.Error())
@@ -133,7 +86,7 @@ func (s *filesService) createBucketIfNotExists(ctx context.Context, bucketName s
 	}
 
 	if !exists {
-		err = s.minio.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{Region: config.DefaultLocation})
+		err = s.minio.MakeBucket(ctx, config.UserDataBucket, makeBucketOptions)
 		if err != nil {
 			err = fmt.Errorf("failed to create bucket: %w", err)
 			slog.Error(err.Error())
