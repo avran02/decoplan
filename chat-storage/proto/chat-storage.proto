@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package chat_storage;
+option go_package = "github.com/avran02/decoplan/chat-storage/pb";
+
+import "google/protobuf/timestamp.proto";
+
+service ChatStorageService {
+    rpc SaveMessage(SaveMessageRequest) returns (SaveMessageResponse);
+    rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+    rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse);
+    rpc CacheLastMessages(GetMessagesRequest) returns (GetMessagesResponse);
+    rpc CreateChat(CreateChatRequest) returns (CreateChatResponse);
+}
+
+message Attachment {
+    string id = 1;
+    uint64 message_id = 2;
+    string chat_id = 3;
+    string url = 4;
+}
+
+message Message {
+    uint64 id = 1;
+    string chat_id = 2;
+    string sender = 3;
+    string content = 4;
+    repeated Attachment attachments = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp deleted_at = 7;
+}
+
+message SaveMessageRequest {
+    Message message = 1;
+}
+
+message SaveMessageResponse {
+    bool ok = 1;
+}
+
+message GetMessagesRequest {
+    string chat_id = 1;
+    uint64 limit = 2;
+    uint64 offset = 3;
+}
+
+message GetMessagesResponse {
+    repeated Message messages = 1;
+}
+
+message DeleteMessageRequest {
+    uint64 message_id = 1;
+    string chat_id = 2;
+}
+
+message DeleteMessageResponse {
+    bool ok = 1;
+}
+
+message CacheLastMessagesRequest {
+    string chat_id = 1;
+}
+
+message CacheLastMessagesResponse {
+    repeated Message messages = 1;
+}
+
+message CreateChatRequest {
+    string chat_id = 1;
+}
+
+message CreateChatResponse {
+    bool ok = 1;
+}
