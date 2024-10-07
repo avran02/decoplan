@@ -68,12 +68,15 @@ func (r *mongoRepository) GetMessages(
 ) ([]models.Message, error) {
 	slog.Debug("mongo.GetMessages", "chatID", chatID, "startIdx", startIdx, "endIdx", endIdx)
 	messages := make([]models.Message, 0)
-	filter := bson.M{"deletedat": nil}
-	findOpts := options.Find()
-	findOpts.SetSkip(int64(startIdx))
-	findOpts.SetLimit(int64(endIdx - startIdx + 1))
+	filter := bson.M{
+		"_id": bson.M{
+			"$gte": startIdx,
+			"$lte": endIdx,
+		},
+		"deletedat": nil,
+	}
 
-	cursor, err := r.db.Collection(chatID).Find(ctx, filter, findOpts)
+	cursor, err := r.db.Collection(chatID).Find(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get messages: %w", err)
 	}

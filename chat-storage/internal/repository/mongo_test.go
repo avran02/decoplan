@@ -7,47 +7,17 @@ import (
 
 	"github.com/avran02/decoplan/chat-storage/internal/config"
 	"github.com/avran02/decoplan/chat-storage/internal/models"
-	"github.com/avran02/decoplan/chat-storage/internal/repository"
-	"github.com/ory/dockertest/v3"
+	"github.com/avran02/decoplan/chat-storage/logger"
+	"github.com/avran02/decoplan/chat-storage/tests/utils"
 	"github.com/stretchr/testify/require"
 )
 
-func setupMongoContainer(t *testing.T) (repository.MongoRepository, func()) {
-	// Create a new pool to manage Docker resources
-	pool, err := dockertest.NewPool("")
-	require.NoError(t, err)
-
-	// Run a MongoDB container
-	resource, err := pool.Run("mongo", "latest", []string{
-		"MONGO_INITDB_DATABASE=testdb",
-		"MONGO_INITDB_ROOT_USERNAME=123",
-		"MONGO_INITDB_ROOT_PASSWORD=123",
-	})
-	require.NoError(t, err)
-
-	// Connect to MongoDB
-
-	// Create MongoRepository
-	repo := repository.NewMongoRepository(&config.Mongo{
-		Host:     "localhost",
-		Port:     resource.GetPort("27017/tcp"),
-		User:     "123",
-		Password: "123",
-		Database: "testdb",
-	})
-
-	// Return the repository and a cleanup function
-	return repo, func() {
-		repo.Close()
-		pool.Purge(resource)
-	}
-}
-
 func TestMongoRepository_E2E(t *testing.T) {
 	ctx := context.Background()
+	logger.Setup(config.Server{LogLevel: "debug"})
 
 	// Start MongoDB container and get MongoRepository
-	repo, tearDown := setupMongoContainer(t)
+	repo, tearDown := utils.SetupMongoContainer(t)
 	defer tearDown()
 
 	// Test 1: Create a chat
@@ -56,10 +26,18 @@ func TestMongoRepository_E2E(t *testing.T) {
 
 	// Create sample messages
 	message1 := models.Message{
-		ID:        0,
-		ChatID:    "chat123",
-		Sender:    "user1",
-		Content:   "First message",
+		ID:      0,
+		ChatID:  "chat123",
+		Sender:  "user1",
+		Content: "First message",
+		Attachments: []models.Attachment{
+			{
+				ID:        "1",
+				URL:       "https://example.com/image.jpg",
+				ChatID:    "chat123",
+				MessageID: 0,
+			},
+		},
 		CreatedAt: time.Now(),
 	}
 	message2 := models.Message{
@@ -82,6 +60,7 @@ func TestMongoRepository_E2E(t *testing.T) {
 	require.Len(t, savedMessages, 2)
 	require.Equal(t, message1.Content, savedMessages[0].Content)
 	require.Equal(t, message2.Content, savedMessages[1].Content)
+	require.Equal(t, "https://example.com/image.jpg", savedMessages[0].Attachments[0].URL)
 
 	// Test 4: Delete a message
 	err = repo.DeleteMessage(ctx, "chat123", 1)

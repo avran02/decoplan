@@ -133,10 +133,11 @@ func (r *redisRepository) DeleteMessage(ctx context.Context, chatID string, mess
 	if err != nil {
 		return fmt.Errorf("failed to get message: %w", err)
 	}
-	message.DeletedAt = &time.Time{}
+	currentTime := time.Now()
+	message.DeletedAt = &currentTime
 
-	if err := r.SaveMessage(ctx, message); err != nil {
-		return fmt.Errorf("failed to save message: %w", err)
+	if err = r.db.Set(ctx, key, message, 0).Err(); err != nil {
+		return fmt.Errorf("failed to logically delete message: %w", err)
 	}
 
 	slog.Debug("deleted message", "chatID", chatID, "messageID", messageID)

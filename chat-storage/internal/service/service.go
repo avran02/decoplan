@@ -29,7 +29,6 @@ func (s *service) SaveMessage(ctx context.Context, message models.Message) error
 }
 
 func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset uint64) ([]models.Message, error) {
-	// todo: add more logs
 	slog.Debug("service.GetMessages", "chatID", chatID, "limit", limit, "offset", offset)
 	var messages []models.Message
 	cacheStartIdx, cacheEndIdx, err := s.redis.GetCacheLimits(ctx, chatID)
@@ -47,16 +46,49 @@ func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset 
 		"cacheEndIdx", cacheEndIdx,
 	)
 	if requestingStartIdx >= cacheStartIdx && requestingEndIdx <= cacheEndIdx {
+		slog.Debug("service.SaveMessage: using only redis")
 		return s.redis.GetMessages(ctx, chatID, requestingStartIdx, requestingEndIdx)
 	}
 
 	// вообще, тут должны быть строгие знаки, чтобы границы тоже брать из кэша
 	// но это слишком много дополнительного усложнения, ради двух сообщений
 	if requestingStartIdx >= cacheEndIdx || requestingEndIdx <= cacheStartIdx {
+		slog.Debug("service.SaveMessage: using only mongo")
 		return s.mongo.GetMessages(ctx, chatID, requestingStartIdx, requestingEndIdx)
 	}
 
+	if requestingStartIdx < cacheStartIdx && requestingEndIdx > cacheEndIdx {
+		slog.Debug("service.SaveMessage: using mongo and cache",
+			"mongoIdxs", []uint64{requestingStartIdx, cacheStartIdx, cacheEndIdx + 1, requestingEndIdx},
+			"redisIdxs", []uint64{cacheStartIdx + 1, cacheEndIdx},
+		)
+
+		mongoMessagesBeforeCache, err := s.mongo.GetMessages(ctx, chatID, requestingStartIdx, cacheStartIdx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get messages from mongo: %w", err)
+		}
+
+		cachedMessages, err := s.redis.GetMessages(ctx, chatID, cacheStartIdx+1, cacheEndIdx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get messages from redis: %w", err)
+		}
+
+		mongoMessagesAfterCache, err := s.mongo.GetMessages(ctx, chatID, cacheEndIdx+1, requestingEndIdx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get messages from mongo: %w", err)
+		}
+
+		messages = append(messages, mongoMessagesBeforeCache...)
+		messages = append(messages, cachedMessages...)
+		messages = append(messages, mongoMessagesAfterCache...)
+		return messages, nil
+	}
+
 	if requestingStartIdx < cacheStartIdx {
+		slog.Debug("service.SaveMessage: using mongo and cache",
+			"mongoIdxs", []uint64{requestingStartIdx + 1, cacheStartIdx},
+			"redisIdxs", []uint64{cacheStartIdx, requestingEndIdx},
+		)
 		cachedMessages, err := s.redis.GetMessages(ctx, chatID, cacheStartIdx, requestingEndIdx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get messages: %w", err)
@@ -71,6 +103,10 @@ func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset 
 	}
 
 	if requestingEndIdx > cacheEndIdx {
+		slog.Debug("service.SaveMessage: using mongo and cache",
+			"mongoIdxs", []uint64{cacheEndIdx + 1, requestingEndIdx},
+			"redisIdxs", []uint64{requestingStartIdx, cacheEndIdx},
+		)
 		cachedMessages, err := s.redis.GetMessages(ctx, chatID, requestingStartIdx, cacheEndIdx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get messages: %w", err)
@@ -89,7 +125,9 @@ func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset 
 
 func (s *service) DeleteMessage(ctx context.Context, chatID string, messageID uint64) error {
 	slog.Debug("service.DeleteMessage", "chatID", chatID, "messageID", messageID)
-	s.mongo.DeleteMessage(ctx, chatID, messageID)
+	if err := s.mongo.DeleteMessage(ctx, chatID, messageID); err != nil {
+		return fmt.Errorf("failed to delete message: %w", err)
+	}
 	return s.redis.DeleteMessage(ctx, chatID, messageID)
 }
 
