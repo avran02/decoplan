@@ -112,10 +112,11 @@ func (r *redisRepository) GetMessages(
 		key := fmt.Sprintf("%s:%d", chatID, id)
 		slog.Debug("getting message", "key", key)
 		message := models.Message{}
-		if err := r.db.Get(ctx, key).Scan(&message); err != nil && !errors.Is(err, redis.Nil) {
+		err := r.db.Get(ctx, key).Scan(&message)
+		if err != nil && !errors.Is(err, redis.Nil) {
 			return nil, fmt.Errorf("failed to get messages: %w", err)
 		}
-		if message.DeletedAt != nil {
+		if message.DeletedAt != nil || errors.Is(err, redis.Nil) {
 			continue
 		}
 		messages = append(messages, message)

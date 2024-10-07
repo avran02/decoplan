@@ -2,11 +2,14 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/avran02/decoplan/chat-storage/internal/mapper"
 	"github.com/avran02/decoplan/chat-storage/internal/service"
 	"github.com/avran02/decoplan/chat-storage/pb"
+	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Controller interface {
@@ -43,6 +46,9 @@ func (c *controller) GetMessages(ctx context.Context, req *pb.GetMessagesRequest
 		slog.Error("failed to get messages", "error", err.Error())
 		return nil, err
 	}
+	for _, message := range messages {
+		slog.Debug("controller.GetMessages: sent message", "len", len(messages), "message", message)
+	}
 
 	return mapper.FromModelToGetMessagesResponse(messages), nil
 }
@@ -52,7 +58,7 @@ func (c *controller) DeleteMessage(ctx context.Context, req *pb.DeleteMessageReq
 		ctx,
 		req.ChatId,
 		req.MessageId,
-	); err != nil {
+	); err != nil && !errors.Is(err, redis.Nil) && !errors.Is(err, mongo.ErrNoDocuments) {
 		slog.Error("failed to delete message", "error", err.Error())
 		return nil, err
 	}
