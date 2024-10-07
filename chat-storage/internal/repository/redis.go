@@ -64,9 +64,15 @@ func (r *redisRepository) SaveMessage(ctx context.Context, message models.Messag
 	}
 
 	start, end, err := r.GetCacheLimits(ctx, message.ChatID)
-	if err != nil {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return fmt.Errorf("failed to get cache limits: %w", err)
 	}
+	if errors.Is(err, redis.Nil) {
+		r.setCacheLimits(ctx, message.ChatID, message.ID, message.ID)
+		slog.Debug("set cache limits", "chatID", message.ChatID, "startCacheIdx", message.ID, "endCacheIdx", message.ID)
+		return nil
+	}
+
 	r.setCacheLimits(ctx, message.ChatID, start, end+1)
 
 	slog.Debug("saved message", "message", message)
@@ -76,7 +82,10 @@ func (r *redisRepository) SaveMessage(ctx context.Context, message models.Messag
 func (r *redisRepository) GetCacheLimits(ctx context.Context, chatID string) (uint64, uint64, error) {
 	slog.Debug("redis.GetCacheLimits", "chatID", chatID)
 
-	cacheLimits := r.db.Get(ctx, fmt.Sprintf("limit:%s", chatID)).Val()
+	cacheLimits, err := r.db.Get(ctx, fmt.Sprintf("limit:%s", chatID)).Result()
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to get cache limits: %w", err)
+	}
 
 	parts := strings.Split(cacheLimits, ":")
 	startIdx, err := strconv.ParseUint(parts[0], 10, 64)
@@ -105,6 +114,9 @@ func (r *redisRepository) GetMessages(
 		message := models.Message{}
 		if err := r.db.Get(ctx, key).Scan(&message); err != nil && !errors.Is(err, redis.Nil) {
 			return nil, fmt.Errorf("failed to get messages: %w", err)
+		}
+		if message.DeletedAt != nil {
+			continue
 		}
 		messages = append(messages, message)
 	}

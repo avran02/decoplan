@@ -57,12 +57,11 @@ func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset 
 	}
 
 	if requestingStartIdx < cacheStartIdx {
-		// duplecates corner message
 		cachedMessages, err := s.redis.GetMessages(ctx, chatID, cacheStartIdx, requestingEndIdx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get messages: %w", err)
 		}
-		mongoMessages, err := s.mongo.GetMessages(ctx, chatID, requestingStartIdx, cacheStartIdx)
+		mongoMessages, err := s.mongo.GetMessages(ctx, chatID, requestingStartIdx+1, cacheStartIdx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get messages: %w", err)
 		}
@@ -76,7 +75,7 @@ func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset 
 		if err != nil {
 			return nil, fmt.Errorf("failed to get messages: %w", err)
 		}
-		mongoMessages, err := s.mongo.GetMessages(ctx, chatID, cacheEndIdx, requestingEndIdx)
+		mongoMessages, err := s.mongo.GetMessages(ctx, chatID, cacheEndIdx+1, requestingEndIdx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get messages: %w", err)
 		}
@@ -85,7 +84,7 @@ func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset 
 		return messages, nil
 	}
 
-	return nil, nil
+	return nil, ErrUnexpectedBehavior
 }
 
 func (s *service) DeleteMessage(ctx context.Context, chatID string, messageID uint64) error {

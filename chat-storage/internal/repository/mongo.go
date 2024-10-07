@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"time"
 
 	"github.com/avran02/decoplan/chat-storage/internal/config"
 	"github.com/avran02/decoplan/chat-storage/internal/models"
@@ -43,12 +44,20 @@ func (r *mongoRepository) SaveMessage(ctx context.Context, message models.Messag
 
 func (r *mongoRepository) DeleteMessage(ctx context.Context, chatID string, MessageID uint64) error {
 	slog.Debug("mongo.DeleteMessage", "chatID", chatID, "MessageID", MessageID)
-	_, err := r.db.Collection(chatID).DeleteOne(ctx, bson.M{"id": MessageID})
+
+	// Устанавливаем текущую метку времени для поля DeletedAt
+	_, err := r.db.Collection(chatID).UpdateOne(
+		ctx,
+		bson.M{"_id": MessageID}, // Условие поиска по ID сообщения
+		bson.M{
+			"$set": bson.M{"deletedat": time.Now()}, // Обновление поля DeletedAt
+		},
+	)
 	if err != nil {
-		return fmt.Errorf("failed to delete message: %w", err)
+		return fmt.Errorf("failed to logically delete message: %w", err)
 	}
 
-	slog.Debug("deleted message", "chatID", chatID, "MessageID", MessageID)
+	slog.Debug("logically deleted message", "chatID", chatID, "MessageID", MessageID)
 	return nil
 }
 
@@ -59,7 +68,7 @@ func (r *mongoRepository) GetMessages(
 ) ([]models.Message, error) {
 	slog.Debug("mongo.GetMessages", "chatID", chatID, "startIdx", startIdx, "endIdx", endIdx)
 	messages := make([]models.Message, 0)
-	filter := bson.M{"deleted_at": nil}
+	filter := bson.M{"deletedat": nil}
 	findOpts := options.Find()
 	findOpts.SetSkip(int64(startIdx))
 	findOpts.SetLimit(int64(endIdx - startIdx + 1))
