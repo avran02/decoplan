@@ -11,11 +11,11 @@ import (
 )
 
 type UserService interface {
-	AddUserToGroup(ctx context.Context, userGroup models.UserGroup) error
-	CreateGroup(ctx context.Context, name string, userIDs []string) (string, error)
-	DeleteGroup(ctx context.Context, groupID string) error
-	GetGroup(ctx context.Context, groupID string) (models.Group, error)
-	RemoveUserFromGroup(ctx context.Context, userGroup models.UserGroup) error
+	AddUserToChat(ctx context.Context, userChat models.UserChat) error
+	CreateChat(ctx context.Context, name string, userIDs []string) (string, error)
+	DeleteChat(ctx context.Context, chatID string) error
+	GetChat(ctx context.Context, chatID string) (models.Chat, error)
+	RemoveUserFromChat(ctx context.Context, userChat models.UserChat) error
 	CreateUser(ctx context.Context, id, name string, birthDate time.Time) error
 	DeleteUser(ctx context.Context, userID string) error
 	GetUser(ctx context.Context, userID string) (models.User, error)
@@ -26,30 +26,30 @@ type userService struct {
 	repo repository.Repository
 }
 
-func (s *userService) AddUserToGroup(ctx context.Context, userGroup models.UserGroup) error {
-	return s.repo.AddUserToGroup(ctx, userGroup)
+func (s *userService) AddUserToChat(ctx context.Context, userChat models.UserChat) error {
+	return s.repo.AddUserToChat(ctx, userChat)
 }
 
-func (s *userService) CreateGroup(ctx context.Context, name string, userIDs []string) (string, error) {
-	groupID := uuid.NewString()
-	if err := s.repo.CreateGroup(ctx, name, groupID, userIDs); err != nil {
-		return "", fmt.Errorf("failed to create group: %w", err)
+func (s *userService) CreateChat(ctx context.Context, name string, userIDs []string) (string, error) {
+	chatID := uuid.NewString()
+	if err := s.repo.CreateChat(ctx, name, chatID, userIDs); err != nil {
+		return "", fmt.Errorf("failed to create chat: %w", err)
 	}
 
-	return groupID, nil
+	return chatID, nil
 }
 
-func (s *userService) DeleteGroup(ctx context.Context, groupID string) error {
-	return s.repo.DeleteGroup(ctx, groupID)
+func (s *userService) DeleteChat(ctx context.Context, chatID string) error {
+	return s.repo.DeleteChat(ctx, chatID)
 
 }
 
-func (s *userService) GetGroup(ctx context.Context, groupID string) (models.Group, error) {
-	return s.repo.GetGroup(ctx, groupID)
+func (s *userService) GetChat(ctx context.Context, chatID string) (models.Chat, error) {
+	return s.repo.GetChat(ctx, chatID)
 }
 
-func (s *userService) RemoveUserFromGroup(ctx context.Context, userGroup models.UserGroup) error {
-	return s.repo.RemoveUserFromGroup(ctx, userGroup)
+func (s *userService) RemoveUserFromChat(ctx context.Context, userChat models.UserChat) error {
+	return s.repo.RemoveUserFromChat(ctx, userChat)
 
 }
 func (s *userService) CreateUser(ctx context.Context, id, name string, birthDate time.Time) error {

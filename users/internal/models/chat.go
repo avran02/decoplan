@@ -1,6 +1,6 @@
 package models
 
-type Group struct {
+type Chat struct {
 	ID      string
 	Name    string
 	Avatar  *string

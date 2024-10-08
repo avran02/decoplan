@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS "groups"(
+CREATE TABLE IF NOT EXISTS "chats"(
     "id" VARCHAR(255) NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "avatar_url" VARCHAR(255),
@@ -13,10 +13,10 @@ CREATE TABLE IF NOT EXISTS "users"(
     PRIMARY KEY("id")
 );
 
-CREATE TABLE IF NOT EXISTS "user_groups"(
+CREATE TABLE IF NOT EXISTS "user_chats"(
     "user_id" VARCHAR(255) NOT NULL,
-    "group_id" VARCHAR(255) NOT NULL,
-    PRIMARY KEY ("user_id", "group_id"),
-    FOREIGN KEY("group_id") REFERENCES "groups"("id") ON DELETE CASCADE,
+    "chat_id" VARCHAR(255) NOT NULL,
+    PRIMARY KEY ("user_id", "chat_id"),
+    FOREIGN KEY("chat_id") REFERENCES "chats"("id") ON DELETE CASCADE,
     FOREIGN KEY("user_id") REFERENCES "users"("id") ON DELETE CASCADE
 );

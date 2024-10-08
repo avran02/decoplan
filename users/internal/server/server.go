@@ -13,16 +13,16 @@ type UsersServer struct {
 	*controller.UserController
 }
 
-func (s UsersServer) AddUserToGroup(ctx context.Context, req *pb.AddUserToGroupRequest) (*pb.AddUserToGroupResponse, error) {
-	return s.UserController.AddUserToGroup(ctx, req)
+func (s UsersServer) AddUserToChat(ctx context.Context, req *pb.AddUserToChatRequest) (*pb.AddUserToChatResponse, error) {
+	return s.UserController.AddUserToChat(ctx, req)
 }
 
-func (s UsersServer) CreateGroup(ctx context.Context, req *pb.CreateGroupRequest) (*pb.CreateGroupResponse, error) {
-	return s.UserController.CreateGroup(ctx, req)
+func (s UsersServer) CreateChat(ctx context.Context, req *pb.CreateChatRequest) (*pb.CreateChatResponse, error) {
+	return s.UserController.CreateChat(ctx, req)
 }
 
-func (s UsersServer) DeleteGroup(ctx context.Context, req *pb.DeleteGroupRequest) (*pb.DeleteGroupResponse, error) {
-	return s.UserController.DeleteGroup(ctx, req)
+func (s UsersServer) DeleteChat(ctx context.Context, req *pb.DeleteChatRequest) (*pb.DeleteChatResponse, error) {
+	return s.UserController.DeleteChat(ctx, req)
 }
 func (s UsersServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	return s.UserController.CreateUser(ctx, req)
@@ -32,16 +32,16 @@ func (s UsersServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) 
 	return s.UserController.DeleteUser(ctx, req)
 }
 
-func (s UsersServer) GetGroup(ctx context.Context, req *pb.GetGroupRequest) (*pb.GetGroupResponse, error) {
-	return s.UserController.GetGroup(ctx, req)
+func (s UsersServer) GetChat(ctx context.Context, req *pb.GetChatRequest) (*pb.GetChatResponse, error) {
+	return s.UserController.GetChat(ctx, req)
 }
 
 func (s UsersServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 	return s.UserController.GetUser(ctx, req)
 }
 
-func (s UsersServer) RemoveUserFromGroup(ctx context.Context, req *pb.RemoveUserFromGroupRequest) (*pb.RemoveUserFromGroupResponse, error) {
-	return s.UserController.RemoveUserFromGroup(ctx, req)
+func (s UsersServer) RemoveUserFromChat(ctx context.Context, req *pb.RemoveUserFromChatRequest) (*pb.RemoveUserFromChatResponse, error) {
+	return s.UserController.RemoveUserFromChat(ctx, req)
 }
 
 func (s UsersServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {

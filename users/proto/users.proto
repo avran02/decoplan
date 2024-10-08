@@ -10,11 +10,11 @@ service UsersService {
     rpc GetUser(GetUserRequest) returns (GetUserResponse);
     rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
     rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
-    rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
-    rpc GetGroup(GetGroupRequest) returns (GetGroupResponse);
-    rpc AddUserToGroup(AddUserToGroupRequest) returns (AddUserToGroupResponse);
-    rpc RemoveUserFromGroup(RemoveUserFromGroupRequest) returns (RemoveUserFromGroupResponse);
-    rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse);
+    rpc CreateChat(CreateChatRequest) returns (CreateChatResponse);
+    rpc GetChat(GetChatRequest) returns (GetChatResponse);
+    rpc AddUserToChat(AddUserToChatRequest) returns (AddUserToChatResponse);
+    rpc RemoveUserFromChat(RemoveUserFromChatRequest) returns (RemoveUserFromChatResponse);
+    rpc DeleteChat(DeleteChatRequest) returns (DeleteChatResponse);
 }
 
 message CreateUserRequest {
@@ -57,22 +57,22 @@ message DeleteUserResponse {
     bool ok = 1;
 }
 
-message CreateGroupRequest {
+message CreateChatRequest {
     string name = 1;
     repeated string userIDs = 2;
 }
 
-message CreateGroupResponse {
-    string groupID = 1;
+message CreateChatResponse {
+    string chatID = 1;
 }
 
-message GetGroupRequest {
+message GetChatRequest {
     string id = 1;
 }
 
-message GetGroupResponse {
+message GetChatResponse {
     string id = 1;
-    optional string groupName = 2;
+    optional string chatName = 2;
     optional string avatar = 3;
     repeated UserMember members = 4;
 }
@@ -81,28 +81,28 @@ message UserMember {
     string userID = 1;
 }
 
-message AddUserToGroupRequest {
-    string groupID = 1;
+message AddUserToChatRequest {
+    string chatID = 1;
     string userID = 2;
 }
 
-message AddUserToGroupResponse {
+message AddUserToChatResponse {
     bool ok = 1;
 }
 
-message RemoveUserFromGroupRequest {
-    string groupID = 1;
+message RemoveUserFromChatRequest {
+    string chatID = 1;
     string userID = 2;
 }
 
-message RemoveUserFromGroupResponse {
+message RemoveUserFromChatResponse {
     bool ok = 1;
 }
 
-message DeleteGroupRequest {
+message DeleteChatRequest {
     string id = 1;
 }
 
-message DeleteGroupResponse {
+message DeleteChatResponse {
     bool ok = 1;
 }

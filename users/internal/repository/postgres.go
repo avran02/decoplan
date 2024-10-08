@@ -15,11 +15,11 @@ import (
 )
 
 type Repository interface {
-	AddUserToGroup(ctx context.Context, ug models.UserGroup) error
-	CreateGroup(ctx context.Context, name, groupID string, userIDs []string) error
-	DeleteGroup(ctx context.Context, groupID string) error
-	GetGroup(ctx context.Context, groupID string) (models.Group, error)
-	RemoveUserFromGroup(ctx context.Context, ug models.UserGroup) error
+	AddUserToChat(ctx context.Context, ug models.UserChat) error
+	CreateChat(ctx context.Context, name, chatID string, userIDs []string) error
+	DeleteChat(ctx context.Context, chatID string) error
+	GetChat(ctx context.Context, chatID string) (models.Chat, error)
+	RemoveUserFromChat(ctx context.Context, ug models.UserChat) error
 	DeleteUser(ctx context.Context, userID string) error
 	GetUser(ctx context.Context, userID string) (models.User, error)
 	UpdateUser(ctx context.Context, user models.UpdateUser) error
@@ -30,11 +30,11 @@ type postgres struct {
 	db *sql.DB
 }
 
-func (p *postgres) RemoveUserFromGroup(ctx context.Context, ug models.UserGroup) error {
-	query := `DELETE FROM user_groups WHERE group_id = $1 AND user_id = $2`
-	_, err := p.db.ExecContext(ctx, query, ug.GroupID, ug.UserID)
+func (p *postgres) RemoveUserFromChat(ctx context.Context, ug models.UserChat) error {
+	query := `DELETE FROM user_chats WHERE chat_id = $1 AND user_id = $2`
+	_, err := p.db.ExecContext(ctx, query, ug.ChatID, ug.UserID)
 	if err != nil {
-		return fmt.Errorf("failed to remove user from group: %w", err)
+		return fmt.Errorf("failed to remove user from chat: %w", err)
 	}
 
 	return nil
@@ -50,21 +50,21 @@ func (p *postgres) DeleteUser(ctx context.Context, userID string) error {
 	return nil
 }
 
-func (p *postgres) DeleteGroup(ctx context.Context, groupID string) error {
-	query := `DELETE FROM groups WHERE id = $1`
-	_, err := p.db.ExecContext(ctx, query, groupID)
+func (p *postgres) DeleteChat(ctx context.Context, chatID string) error {
+	query := `DELETE FROM chats WHERE id = $1`
+	_, err := p.db.ExecContext(ctx, query, chatID)
 	if err != nil {
-		return fmt.Errorf("failed to delete group: %w", err)
+		return fmt.Errorf("failed to delete chat: %w", err)
 	}
 
 	return nil
 }
 
-func (p *postgres) AddUserToGroup(ctx context.Context, ug models.UserGroup) error {
-	query := `INSERT INTO user_groups (group_id, user_id) VALUES ($1, $2)`
-	_, err := p.db.ExecContext(ctx, query, ug.GroupID, ug.UserID)
+func (p *postgres) AddUserToChat(ctx context.Context, ug models.UserChat) error {
+	query := `INSERT INTO user_chats (chat_id, user_id) VALUES ($1, $2)`
+	_, err := p.db.ExecContext(ctx, query, ug.ChatID, ug.UserID)
 	if err != nil {
-		return fmt.Errorf("failed to add user to group: %w", err)
+		return fmt.Errorf("failed to add user to chat: %w", err)
 	}
 
 	return nil
@@ -132,52 +132,52 @@ func (p *postgres) UpdateUser(ctx context.Context, user models.UpdateUser) error
 	return nil
 }
 
-func (p *postgres) CreateGroup(ctx context.Context, name, groupID string, userIDs []string) error {
-	slog.Debug("postgres.CreateGroup", "name", name, "groupID", groupID, "userIDs", userIDs)
+func (p *postgres) CreateChat(ctx context.Context, name, chatID string, userIDs []string) error {
+	slog.Debug("postgres.CreateChat", "name", name, "chatID", chatID, "userIDs", userIDs)
 
-	query := `INSERT INTO groups (id, name) VALUES ($1, $2)`
-	_, err := p.db.ExecContext(ctx, query, groupID, name)
+	query := `INSERT INTO chats (id, name) VALUES ($1, $2)`
+	_, err := p.db.ExecContext(ctx, query, chatID, name)
 	if err != nil {
-		return fmt.Errorf("failed to create group: %w", err)
+		return fmt.Errorf("failed to create chat: %w", err)
 	}
 
 	for _, userID := range userIDs {
-		query := `INSERT INTO user_groups (group_id, user_id) VALUES ($1, $2)`
-		_, err := p.db.ExecContext(ctx, query, groupID, userID)
+		query := `INSERT INTO user_chats (chat_id, user_id) VALUES ($1, $2)`
+		_, err := p.db.ExecContext(ctx, query, chatID, userID)
 		if err != nil {
-			return fmt.Errorf("failed to add user to group: %w", err)
+			return fmt.Errorf("failed to add user to chat: %w", err)
 		}
 	}
 
 	return nil
 }
 
-func (p *postgres) GetGroup(ctx context.Context, groupID string) (models.Group, error) {
-	query := `SELECT g.id, g.name, g.avatar_url, u.user_id FROM groups g 
-              LEFT JOIN user_groups u ON g.id = u.group_id
+func (p *postgres) GetChat(ctx context.Context, chatID string) (models.Chat, error) {
+	query := `SELECT g.id, g.name, g.avatar_url, u.user_id FROM chats g 
+              LEFT JOIN user_chats u ON g.id = u.chat_id
               WHERE g.id = $1`
 
-	rows, err := p.db.QueryContext(ctx, query, groupID)
+	rows, err := p.db.QueryContext(ctx, query, chatID)
 	if err != nil {
-		return models.Group{}, fmt.Errorf("failed to get group: %w", err)
+		return models.Chat{}, fmt.Errorf("failed to get chat: %w", err)
 	}
 	defer rows.Close()
 
 	var members []*models.User
-	var groupIDOut, groupName string
+	var chatIDOut, chatName string
 	var avatar sql.NullString
 
 	for rows.Next() {
 		var userID string
-		if err := rows.Scan(&groupIDOut, &groupName, &avatar, &userID); err != nil {
-			return models.Group{}, fmt.Errorf("failed to get group: %w", err)
+		if err := rows.Scan(&chatIDOut, &chatName, &avatar, &userID); err != nil {
+			return models.Chat{}, fmt.Errorf("failed to get chat: %w", err)
 		}
 		members = append(members, &models.User{ID: userID})
 	}
 
-	return models.Group{
-		ID:      groupIDOut,
-		Name:    groupName,
+	return models.Chat{
+		ID:      chatIDOut,
+		Name:    chatName,
 		Avatar:  &avatar.String,
 		Members: members,
 	}, nil
