@@ -1,0 +1,145 @@
+openapi: 3.0.0
+info:
+  title: Chat Microservice API
+  version: 1.0.0
+  description: API для управления чатом и сообщениями через WebSocket.
+
+servers:
+  - url: ws://host/v1
+    description: Основной WebSocket сервер микросервиса чата
+
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        sender:
+          type: string
+          example: "user123"
+        content:
+          type: object
+          properties:
+            text:
+              type: string
+              example: "Hello, world!"
+              description: Текст вложения
+            attachments:
+              type: array
+              items:
+                type: string
+                format: url
+                description: URL вложения
+              example: ["https://files.host/uuid.jpg"]
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-02T10:00:00Z"
+
+  parameters:
+    messageId:
+      in: path
+      name: id
+      required: true
+      description: ID сообщения
+      schema:
+        type: string
+    
+
+paths:
+  /connect:
+    post:
+      tags:
+        - Connection
+      security:
+        - bearerAuth: []
+      summary: Установить соединение WebSocket
+      responses:
+        '101':
+          description: Соединение установлено
+  /disconnect:
+    post:
+      tags:
+        - Connection
+      security:
+        - bearerAuth: []
+      summary: Закрыть соединение WebSocket
+      responses:
+        '101':
+          description: Соединение закрыто 
+  
+  /new-message:
+    get:
+      tags:
+        - FromServerEvent
+      summary: Сервер отправляет новое сообщение на клиент
+      responses:
+        '200':
+          description: Подписка успешна
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+                  
+  /messages:
+    get:
+      tags:
+        - FromUserEvent
+      summary: Получить список сообщений
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Список сообщений получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+
+    post:
+      tags:
+        - FromUserEvent
+      summary: Отправить новое сообщение
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+      responses:
+        '201':
+          description: Сообщение успешно отправлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /messages/{id}:
+    delete:
+      tags:
+        - FromUserEvent
+      summary: Удалить сообщение по ID
+      parameters:
+        - $ref: '#/components/parameters/messageId'
+      responses:
+        '204':
+          description: Сообщение успешно удалено
+        '404':
+          description: Сообщение не найдено
+
+
