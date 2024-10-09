@@ -8,6 +8,7 @@ import (
 	"github.com/avran02/decoplan/chat/internal/config"
 	"github.com/avran02/decoplan/chat/internal/hub"
 	"github.com/avran02/decoplan/chat/internal/router"
+	"github.com/avran02/decoplan/chat/internal/service"
 	"github.com/avran02/decoplan/chat/logger"
 )
 
@@ -32,7 +33,8 @@ func New() *App {
 	logger.Setup(config.Server)
 	slog.Debug(fmt.Sprintf("config: %+v", config))
 
-	hub := hub.New()
+	s := service.New(nil) //todo: create conn
+	hub := hub.New(s)
 
 	router := router.New(hub)
 	return &App{

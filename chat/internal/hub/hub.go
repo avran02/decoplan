@@ -1,6 +1,7 @@
 package hub
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/avran02/decoplan/chat/enum"
 	"github.com/avran02/decoplan/chat/internal/dto"
+	"github.com/avran02/decoplan/chat/internal/service"
 	"github.com/gorilla/websocket"
 
 	jsoniter "github.com/json-iterator/go"
@@ -29,6 +31,7 @@ type WebsocketHub interface {
 
 type websocketHub struct {
 	clients map[string]*websocket.Conn
+	service service.Service
 	mu      sync.RWMutex
 }
 
@@ -84,7 +87,7 @@ func (hub *websocketHub) handleClientMessage(remoteAddr string, conn *websocket.
 			break
 		}
 
-		var userMsg dto.UserRequest
+		var userMsg dto.UserRequestDto
 		if err := json.Unmarshal(message, &userMsg); err != nil {
 			slog.Error("failed to unmarshal message from %s: %v", remoteAddr, err)
 			continue
@@ -92,25 +95,53 @@ func (hub *websocketHub) handleClientMessage(remoteAddr string, conn *websocket.
 
 		switch userMsg.Action {
 		case enum.UserSendMessage:
-			hub.UserSendMessageController(conn, userMsg.Payload)
+			hub.userSendMessageController(conn, userMsg.Payload)
 		case enum.UserGetMessages:
-			hub.UserAsksMessagesController(conn, userMsg.Payload)
+			hub.userAsksMessagesController(conn, userMsg.Payload)
 		case enum.UserDeleteMessage:
-			hub.UserDeleteMessageController(conn, userMsg.Payload)
+			hub.userDeleteMessageController(conn, userMsg.Payload)
 		}
 	}
 }
 
 // controllers
-func (hub *websocketHub) UserSendMessageController(conn *websocket.Conn, payload []byte) {}
+func (hub *websocketHub) userSendMessageController(conn *websocket.Conn, payload []byte) {
+	slog.Debug("userSendMessageController", "payload", string(payload), "conn", conn)
+	var req dto.NewMessageDto
+	if err := json.Unmarshal(payload, &req); err != nil {
+		slog.Error("failed to unmarshal message", "error", err)
+		return
+	}
 
-func (hub *websocketHub) UserDeleteMessageController(conn *websocket.Conn, payload []byte) {}
+	if err := hub.service.SaveMessage(context.Background(), req.Message); err != nil {
+		slog.Error("failed to save message", "error", err)
+		return
+	}
+	hub.broadcastMessage(payload)
+}
 
-func (hub *websocketHub) UserAsksMessagesController(conn *websocket.Conn, payload []byte) {}
+func (hub *websocketHub) userDeleteMessageController(conn *websocket.Conn, payload []byte) {
+	slog.Debug("userDeleteMessageController", "payload", string(payload), "conn", conn)
+	var req dto.DeleteMessageDto
+	if err := json.Unmarshal(payload, &req); err != nil {
+		slog.Error("failed to unmarshal message", "error", err)
+		return
+	}
+}
 
-func New() WebsocketHub {
+func (hub *websocketHub) userAsksMessagesController(conn *websocket.Conn, payload []byte) {
+	slog.Debug("userAsksMessagesController", "payload", string(payload), "conn", conn)
+	var req dto.AskMessagesDto
+	if err := json.Unmarshal(payload, &req); err != nil {
+		slog.Error("failed to unmarshal message", "error", err)
+		return
+	}
+}
+
+func New(service service.Service) WebsocketHub {
 	return &websocketHub{
 		clients: make(map[string]*websocket.Conn),
+		service: service,
 		mu:      sync.RWMutex{},
 	}
 }

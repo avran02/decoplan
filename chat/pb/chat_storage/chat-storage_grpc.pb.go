@@ -4,7 +4,7 @@
 // - protoc             v5.28.1
 // source: chat-storage.proto
 
-package pb
+package storagepb
 
 import (
 	context "context"

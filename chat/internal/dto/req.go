@@ -6,7 +6,7 @@ import (
 	"github.com/avran02/decoplan/chat/enum"
 )
 
-type UserRequest struct {
+type UserRequestDto struct {
 	Action  enum.UserMessages `json:"act"`
 	Payload json.RawMessage   `json:"payload"`
 }
