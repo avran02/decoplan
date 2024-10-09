@@ -24,6 +24,11 @@ type service struct {
 
 func (s *service) SaveMessage(ctx context.Context, message models.Message) error {
 	slog.Debug("service.SaveMessage", "message", message)
+	id, err := s.mongo.GetNextMessageID(ctx, message.ChatID)
+	if err != nil {
+		return fmt.Errorf("failed to get next message ID: %w", err)
+	}
+	message.ID = id
 	s.mongo.SaveMessage(ctx, message)
 	return s.redis.SaveMessage(ctx, message)
 }
