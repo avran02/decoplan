@@ -12,12 +12,12 @@ func FromSaveMessageDtoToModel(req *pb.SaveMessageRequest) models.Message {
 			ID:        a.Id,
 			URL:       a.Url,
 			ChatID:    req.Message.ChatId,
-			MessageID: req.Message.Id,
+			MessageID: *req.Message.Id,
 		})
 	}
 
 	return models.Message{
-		ID:          req.Message.Id,
+		ID:          *req.Message.Id,
 		ChatID:      req.Message.ChatId,
 		Sender:      req.Message.Sender,
 		Content:     req.Message.Content,

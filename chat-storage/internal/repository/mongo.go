@@ -14,11 +14,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var (
+	mongoIncrementMessageIDCollectionName = "messageCounters"
+)
+
 type MongoRepository interface {
 	CreateChat(ctx context.Context, chatID string) error
 	SaveMessage(ctx context.Context, message models.Message) error
 	DeleteMessage(ctx context.Context, chatID string, MessageID uint64) error
 	GetMessages(ctx context.Context, chatID string, startIdx, endIdx uint64) ([]models.Message, error)
+	GetNextMessageID(ctx context.Context, chatID string) (uint64, error)
 
 	Close() error
 }
@@ -96,6 +101,22 @@ func (r *mongoRepository) GetMessages(
 
 	slog.Debug("got messages", "chatID", chatID, "messages", messages)
 	return messages, nil
+}
+
+func (r *mongoRepository) GetNextMessageID(ctx context.Context, chatID string) (uint64, error) {
+	filter := bson.M{"_id": chatID}
+	update := bson.M{"$inc": bson.M{"counter": 1}}
+	options := options.FindOneAndUpdate().SetReturnDocument(options.After).SetUpsert(true)
+
+	var result struct {
+		Counter uint64 `bson:"counter"`
+	}
+
+	err := r.db.Collection(mongoIncrementMessageIDCollectionName).FindOneAndUpdate(ctx, filter, update, options).Decode(&result)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get next message ID: %w", err)
+	}
+	return result.Counter, nil
 }
 
 func (r *mongoRepository) Close() error {

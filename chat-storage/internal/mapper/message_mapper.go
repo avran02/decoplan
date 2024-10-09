@@ -12,7 +12,7 @@ func MessageModelToPB(model models.Message) *pb.Message {
 		attachments = append(attachments, AttachmentModelToPB(a))
 	}
 	resp := &pb.Message{
-		Id:          model.ID,
+		Id:          &model.ID,
 		ChatId:      model.ChatID,
 		Sender:      model.Sender,
 		Content:     model.Content,

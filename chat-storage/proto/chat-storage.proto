@@ -21,7 +21,7 @@ message Attachment {
 }
 
 message Message {
-    uint64 id = 1;
+    optional uint64 id = 1;
     string chat_id = 2;
     string sender = 3;
     string content = 4;
