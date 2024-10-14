@@ -8,13 +8,20 @@ import (
 )
 
 type Config struct {
-	Server Server
+	Server           Server
+	ExternalServices ExternalServices
 }
 
 type Server struct {
 	LogLevel string
 	Port     string
 	Host     string
+}
+
+type ExternalServices struct {
+	AuthURL    string
+	StorageURL string
+	UsersURL   string
 }
 
 func New() *Config {
@@ -30,6 +37,11 @@ func New() *Config {
 			LogLevel: os.Getenv("SERVER_LOG_LEVEL"),
 			Port:     os.Getenv("SERVER_PORT"),
 			Host:     os.Getenv("SERVER_HOST"),
+		},
+		ExternalServices: ExternalServices{
+			AuthURL:    os.Getenv("AUTH_SERVER_URL"),
+			StorageURL: os.Getenv("STORAGE_SERVER_URL"),
+			UsersURL:   os.Getenv("USERS_SERVER_URL"),
 		},
 	}
 

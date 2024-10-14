@@ -14,10 +14,20 @@ tasks:
     cmds: 
     - mkdir -p pb/users
     - protoc -I proto proto/users.proto --go_out=./pb/users --go_opt=paths=source_relative --go-grpc_out=./pb/users --go-grpc_opt=paths=source_relative
+  
+  generate-auth-client:
+    aliases:
+      - gen-auth-client
+    cmds:
+    - mkdir -p pb/auth
+    - protoc -I proto proto/auth.proto --go_out=./pb/auth --go_opt=paths=source_relative --go-grpc_out=./pb/auth --go-grpc_opt=paths=source_relative
+
   regeneratepb:
     cmds:
     - rm -rf pb
     - mkdir -p pb/users
     - mkdir -p pb/chat_storage
+    - mkdir -p pb/auth
     - protoc -I proto proto/chat-storage.proto --go_out=./pb/chat_storage --go_opt=paths=source_relative --go-grpc_out=./pb/chat_storage --go-grpc_opt=paths=source_relative
     - protoc -I proto proto/users.proto --go_out=./pb/users --go_opt=paths=source_relative --go-grpc_out=./pb/users --go-grpc_opt=paths=source_relative
+    - protoc -I proto proto/auth.proto --go_out=./pb/auth --go_opt=paths=source_relative --go-grpc_out=./pb/auth --go-grpc_opt=paths=source_relative
