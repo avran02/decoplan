@@ -6,16 +6,16 @@ import (
 )
 
 type Message struct {
-	ID     uint64
-	ChatID string
+	ID     uint64 `json:"id"`
+	ChatID string `json:"chatId"`
 
-	Sender  string
-	Content string
+	Sender  string `json:"sender"`
+	Content string `json:"content"`
 
-	Attachments []Attachment
+	Attachments []Attachment `json:"attachments"`
 
-	CreatedAt time.Time
-	DeletedAt *time.Time
+	CreatedAt time.Time  `json:"createdAt"`
+	DeletedAt *time.Time `json:"deletedAt"`
 }
 
 func (m Message) MarshalBinary() ([]byte, error) {
@@ -26,10 +26,10 @@ func (m *Message) UnmarshalBinary(data []byte) error {
 }
 
 type Attachment struct {
-	ID        string
-	MessageID uint64
-	ChatID    string
-	URL       string
+	ID        string `json:"id"`
+	MessageID uint64 `json:"messageId"`
+	ChatID    string `json:"chatId"`
+	URL       string `json:"url"`
 }
 
 func (a Attachment) MarshalBinary() ([]byte, error) {

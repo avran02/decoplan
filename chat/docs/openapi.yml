@@ -10,6 +10,21 @@ servers:
 
 components:
   schemas:
+    AttachmentsReq:
+      type: array
+      items:
+        type: object
+        properties:
+          id: 
+            type: string
+            example: "1"
+            description: ID вложения
+          url:
+            type: string
+            format: url
+            example: "https://files.host/uuid.jpg"
+            description: URL вложения
+
     Message:
       type: object
       properties:
@@ -27,25 +42,56 @@ components:
               example: "Hello, world!"
               description: Текст вложения
             attachments:
-              type: array
-              items:
-                type: string
-                format: url
-                description: URL вложения
-              example: ["https://files.host/uuid.jpg"]
+              $ref: '#/components/schemas/AttachmentsReq'
+              description: Список вложений
         timestamp:
           type: string
           format: date-time
           example: "2023-10-02T10:00:00Z"
-
-  parameters:
-    messageId:
-      in: path
-      name: id
-      required: true
-      description: ID сообщения
-      schema:
-        type: string
+    AskMessagesDto:
+      type: object
+      properties:
+        chatId:
+          type: string
+          example: "chat-uuid"
+        limit:
+          type: number
+          example: 10
+          description: Количество сообщений
+        offset:
+          type: number
+          example: 0
+          description: Смещение
+    DeleteMessageDto:
+      type: object
+      properties:
+        chatId:
+          type: string
+          example: "chat-uuid"
+        messageId:
+          type: number
+          example: 1
+          description: ID сообщения
+    NewMessageDto:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-02T10:00:00Z"
+        chatId:
+          type: string
+          example: "chat-uuid"
+        content:
+          type: object
+          properties:
+            text:
+              type: string
+              example: "Hello, world!"
+              description: Текст вложения
+            attachments:
+              $ref: '#/components/schemas/AttachmentsReq'
+              description: Список вложений
     
 
 paths:
@@ -86,21 +132,17 @@ paths:
                   $ref: '#/components/schemas/Message'
                   
   /messages:
-    get:
+    put:
       tags:
         - FromUserEvent
       summary: Получить список сообщений
-      parameters:
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: number
-        - in: query
-          name: offset
-          required: false
-          schema:
-            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/AskMessagesDto'
+              
       responses:
         '200':
           description: Список сообщений получен
@@ -120,7 +162,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Message'
+              $ref: '#/components/schemas/NewMessageDto'
       responses:
         '201':
           description: Сообщение успешно отправлено
@@ -134,8 +176,12 @@ paths:
       tags:
         - FromUserEvent
       summary: Удалить сообщение по ID
-      parameters:
-        - $ref: '#/components/parameters/messageId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteMessageDto'
       responses:
         '204':
           description: Сообщение успешно удалено

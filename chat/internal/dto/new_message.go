@@ -3,7 +3,6 @@ package dto
 import "time"
 
 type NewMessageDto struct {
-	Sender    string    `json:"sender"`
 	ChatID    string    `json:"chatId"`
 	Content   Content   `json:"content"`
 	TimeStamp time.Time `json:"timestamp"`

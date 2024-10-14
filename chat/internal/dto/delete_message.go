@@ -1,6 +1,6 @@
 package dto
 
 type DeleteMessageDto struct {
-	ID     string `json:"id"`
-	ChatID string `json:"chatId"`
+	MessageID uint64 `json:"messageId"`
+	ChatID    string `json:"chatId"`
 }
