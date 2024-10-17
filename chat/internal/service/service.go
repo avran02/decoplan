@@ -92,15 +92,21 @@ func (s *service) GetChatMembers(ctx context.Context, chatID, userID string) ([]
 }
 
 func (s *service) ValidateToken(ctx context.Context, token string) (string, error) {
-	resp, err := s.authClient.ValidateToken(context.Background(), &authpb.ValidateTokenRequest{AccessToken: token})
+	resp, err := s.authClient.ValidateToken(ctx, &authpb.ValidateTokenRequest{AccessToken: token})
 	if err != nil {
 		return "", fmt.Errorf("failed to validate token: %w", err)
 	}
 	return resp.GetId(), nil
 }
 
-func New(storageClient storagepb.ChatStorageServiceClient) Service {
+func New(
+	storageClient storagepb.ChatStorageServiceClient,
+	authClint authpb.AuthServiceClient,
+	usersClint userspb.UsersServiceClient,
+) Service {
 	return &service{
+		usersClient:   usersClint,
+		authClient:    authClint,
 		storageClient: storageClient,
 	}
 }

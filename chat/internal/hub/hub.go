@@ -44,6 +44,7 @@ func (hub *websocketHub) RegisterWebsocket(w http.ResponseWriter, r *http.Reques
 	hub.mu.Lock()
 	defer hub.mu.Unlock()
 	tokenHeader := r.Header.Get("Authorization")
+	slog.Debug("hub.RegisterWebsocket", "Authorization", tokenHeader)
 	if tokenHeader == "" {
 		http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
 		return
@@ -51,12 +52,14 @@ func (hub *websocketHub) RegisterWebsocket(w http.ResponseWriter, r *http.Reques
 
 	bearerToken := strings.TrimPrefix(tokenHeader, "Bearer ")
 	if bearerToken == tokenHeader {
+		slog.Error("hub.RegisterWebsocket", "error", "mismatching tokenHeader and bearerToken")
 		http.Error(w, "Invalid token format", http.StatusUnauthorized)
 		return
 	}
 
-	id, err := hub.service.ValidateToken(r.Context(), bearerToken)
+	id, err := hub.service.ValidateToken(r.Context(), tokenHeader)
 	if err != nil {
+		slog.Error("hub.RegisterWebsocket failed to validate token", "error", err.Error())
 		http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
 		return
 	}

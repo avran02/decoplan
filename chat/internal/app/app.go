@@ -33,7 +33,11 @@ func New() *App {
 	logger.Setup(config.Server)
 	slog.Debug(fmt.Sprintf("config: %+v", config))
 
-	s := service.New(nil) //todo: create conn
+	s := service.New(connectExternalServices(
+		config.ExternalServices.AuthURL,
+		config.ExternalServices.UsersURL,
+		config.ExternalServices.StorageURL,
+	))
 	hub := hub.New(s)
 
 	router := router.New(hub)
