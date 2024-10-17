@@ -1,0 +1,30 @@
+{
+	log {
+		output stdout
+		level DEBUG
+	}
+	servers {
+		timeouts {
+			read_body 5m
+			read_header 5m
+			write 5m
+			idle 5m
+		}
+	}
+}
+
+localhost {
+	reverse_proxy /api/* gateway:3001
+}
+
+# ws.localhost {
+# 	reverse_proxy chat:8888
+# }
+
+files.localhost {
+	reverse_proxy files:50051
+}
+
+hello.localhost {
+	respond "Hello, World!"
+}
