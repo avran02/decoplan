@@ -57,7 +57,7 @@ func (hub *websocketHub) RegisterWebsocket(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	id, err := hub.service.ValidateToken(r.Context(), tokenHeader)
+	id, err := hub.service.ValidateToken(r.Context(), bearerToken)
 	if err != nil {
 		slog.Error("hub.RegisterWebsocket failed to validate token", "error", err.Error())
 		http.Error(w, "Invalid or expired token", http.StatusUnauthorized)

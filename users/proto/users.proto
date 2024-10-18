@@ -10,11 +10,13 @@ service UsersService {
     rpc GetUser(GetUserRequest) returns (GetUserResponse);
     rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
     rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+
     rpc CreateChat(CreateChatRequest) returns (CreateChatResponse);
     rpc GetChat(GetChatRequest) returns (GetChatResponse);
-    rpc AddUserToChat(AddUserToChatRequest) returns (AddUserToChatResponse);
-    rpc RemoveUserFromChat(RemoveUserFromChatRequest) returns (RemoveUserFromChatResponse);
     rpc DeleteChat(DeleteChatRequest) returns (DeleteChatResponse);
+    
+    rpc RemoveUserFromChat(RemoveUserFromChatRequest) returns (RemoveUserFromChatResponse);
+    rpc AddUserToChat(AddUserToChatRequest) returns (AddUserToChatResponse);
 }
 
 message CreateUserRequest {

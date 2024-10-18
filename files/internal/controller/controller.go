@@ -48,8 +48,6 @@ func (c filesController) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Функция парсит multipart/form-data. Файл имплементирует io.Reader и передаётся в service.UploadFile для сохранения в minio
-// fileExt - расширение файла, которое передаётся в запроса
 func (c filesController) UploadFile(w http.ResponseWriter, r *http.Request) {
 	slog.Info("filesController.UploadFile")
 

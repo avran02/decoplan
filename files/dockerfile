@@ -25,8 +25,4 @@ WORKDIR /root/
 
 COPY --from=build /app/main .
 
-ENV PORT=50051
-
-EXPOSE $PORT
-
-CMD ["./main", "serve"]
+CMD ["./main"]
