@@ -14,6 +14,12 @@
 }
 
 localhost {
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+		Access-Control-Allow-Headers "Authorization, Content-Type, X-CSRF-Token"
+		Access-Control-Allow-Credentials true
+	}
 	reverse_proxy /api/* gateway:3001
 }
 
@@ -22,6 +28,12 @@ localhost {
 # }
 
 files.localhost {
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+		Access-Control-Allow-Headers "Authorization, Content-Type, X-CSRF-Token"
+		Access-Control-Allow-Credentials true
+	}
 	reverse_proxy files:50051
 }
 

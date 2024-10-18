@@ -4,6 +4,7 @@ import (
 	"github.com/avran02/decoplan/chat/internal/hub"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 type Router struct {
@@ -29,6 +30,7 @@ func New(hub hub.WebsocketHub) *Router {
 
 	routes := r.getConnectionRoutes()
 	r.Router = routes
+	cors.AllowAll()
 
 	return r
 }
