@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/avran02/decplan/gateway/internal/controllers"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 )
 
@@ -28,7 +29,8 @@ func New(controller controllers.AuthController) Router {
 		ac: controller,
 	}
 	main := chi.NewRouter()
-	cors.AllowAll()
+	main.Use(middleware.Logger)
+	main.Use(cors.Handler(allowAllCORS()))
 
 	filesRouter := r.getAuthRoutes()
 	main.Mount("/", filesRouter)
