@@ -6,8 +6,8 @@ type LoginRequestDTO struct {
 }
 
 type LoginResponseDTO struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type RegisterRequestDTO struct {
@@ -21,12 +21,12 @@ type RegisterResponseDTO struct {
 }
 
 type RefreshTokensRequestDTO struct {
-	RefreshToken string `json:"refresh_token" validate:"required"`
+	RefreshToken string `json:"refreshToken" validate:"required"`
 }
 
 type RefreshTokensResponseDTO struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type LogoutRequestDTO struct {
