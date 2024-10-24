@@ -28,13 +28,17 @@ func (a *authController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := a.authService.Register(r.Context(), req.Username, req.Password, req.Email)
+	id, at, rt, err := a.authService.Register(r.Context(), req.Username, req.Password, req.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	resp := dto.RegisterResponseDTO{Success: true}
+	resp := dto.RegisterResponseDTO{
+		ID:           id,
+		AccessToken:  at,
+		RefreshToken: rt,
+	}
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -48,13 +52,14 @@ func (a *authController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, refreshToken, err := a.authService.Login(r.Context(), req.Username, req.Password)
+	id, accessToken, refreshToken, err := a.authService.Login(r.Context(), req.Username, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
 	resp := dto.LoginResponseDTO{
+		ID:           id,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
@@ -71,13 +76,12 @@ func (a *authController) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := a.authService.Logout(r.Context(), req.AccessToken)
-	if err != nil {
+	if err := a.authService.Logout(r.Context(), req.AccessToken); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	resp := dto.LogoutResponseDTO{Success: true}
+	resp := dto.LogoutResponseDTO{Ok: true}
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

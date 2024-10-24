@@ -6,18 +6,21 @@ type LoginRequestDTO struct {
 }
 
 type LoginResponseDTO struct {
+	ID           string `json:"id"`
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 }
 
 type RegisterRequestDTO struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
-	Email    string `json:"email" validate:"required,email"`
+	Username string  `json:"username" validate:"required"`
+	Password string  `json:"password" validate:"required"`
+	Email    *string `json:"email" validate:"email, omitempty"`
 }
 
 type RegisterResponseDTO struct {
-	Success bool `json:"success"`
+	ID           string `json:"id"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type RefreshTokensRequestDTO struct {
@@ -30,9 +33,9 @@ type RefreshTokensResponseDTO struct {
 }
 
 type LogoutRequestDTO struct {
-	AccessToken string `json:"access_token" validate:"required"`
+	AccessToken string `json:"accessToken" validate:"required"`
 }
 
 type LogoutResponseDTO struct {
-	Success bool `json:"success"`
+	Ok bool `json:"ok"`
 }

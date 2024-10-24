@@ -20,5 +20,6 @@ func allowAllCORS() cors.Options {
 		},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: false,
+		Debug:            true,
 	}
 }

@@ -231,7 +231,7 @@ services:
   #     - ./data/redisinsight:/db
 
   auth:
-    image: avran/authentication
+    image: avran/authentication:v0.2
     depends_on:
       - auth-mongo
     restart: always

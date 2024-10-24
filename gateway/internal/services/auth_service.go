@@ -8,17 +8,21 @@ import (
 )
 
 type AuthService interface {
-	Login(context.Context, string, string) (string, string, error)
-	Register(context.Context, string, string, string) error
-	RefreshTokens(context.Context, string) (string, string, error)
-	Logout(context.Context, string) error
+	Register(
+		ctx context.Context,
+		username, password string,
+		email *string,
+	) (id, accessToken, refreshToken string, err error)
+	Login(ctx context.Context, username, password string) (id, accessToken, refreshToken string, err error)
+	RefreshTokens(ctx context.Context, token string) (accessToken, refreshToken string, err error)
+	Logout(ctx context.Context, token string) error
 }
 
 type authService struct {
 	client pb.AuthServiceClient
 }
 
-func (a *authService) Login(ctx context.Context, username, password string) (accesToken, refreshToken string, err error) {
+func (a *authService) Login(ctx context.Context, username, password string) (id, accesToken, refreshToken string, err error) {
 	req := &pb.LoginRequest{
 		Username: username,
 		Password: password,
@@ -26,15 +30,13 @@ func (a *authService) Login(ctx context.Context, username, password string) (acc
 
 	resp, err := a.client.Login(ctx, req)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 
-	accesToken = resp.AccessToken
-	refreshToken = resp.RefreshToken
-	return accesToken, refreshToken, nil
+	return resp.Id, resp.AccessToken, resp.RefreshToken, nil
 }
 
-func (a *authService) Register(ctx context.Context, username, password, email string) error {
+func (a *authService) Register(ctx context.Context, username, password string, email *string) (id, accesToken, refreshToken string, err error) {
 	req := &pb.RegisterRequest{
 		Username: username,
 		Password: password,
@@ -43,14 +45,10 @@ func (a *authService) Register(ctx context.Context, username, password, email st
 
 	resp, err := a.client.Register(ctx, req)
 	if err != nil {
-		return err
+		return "", "", "", err
 	}
 
-	if !resp.Success {
-		return errors.New("failed to register")
-	}
-
-	return nil
+	return resp.Id, resp.AccessToken, resp.RefreshToken, nil
 }
 
 func (a *authService) RefreshTokens(ctx context.Context, refreshToken string) (string, string, error) {
@@ -76,7 +74,7 @@ func (a *authService) Logout(ctx context.Context, accessToken string) error {
 		return err
 	}
 
-	if !resp.Success {
+	if !resp.Ok {
 		return errors.New("failed to logout")
 	}
 
