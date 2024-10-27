@@ -1,6 +1,9 @@
 package controllers
 
-import jsoniter "github.com/json-iterator/go"
+import (
+	"github.com/avran02/decplan/gateway/internal/services"
+	jsoniter "github.com/json-iterator/go"
+)
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
@@ -17,6 +20,9 @@ func (c Controller) ChatsController() ChatsController {
 	return c.cc
 }
 
-func New() *Controller {
-	return &Controller{}
+func New(srv services.UsersService) *Controller {
+	return &Controller{
+		uc: newUsersController(srv),
+		cc: newChatsController(srv),
+	}
 }

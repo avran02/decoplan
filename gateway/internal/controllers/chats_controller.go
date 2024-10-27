@@ -122,6 +122,8 @@ func (c *chatsController) AddUserToChatHandler(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func NewChatsController() ChatsController {
-	return &chatsController{}
+func newChatsController(srv services.UsersService) ChatsController {
+	return &chatsController{
+		s: srv,
+	}
 }
