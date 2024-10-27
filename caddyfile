@@ -20,6 +20,7 @@ localhost {
 		Access-Control-Allow-Headers "Authorization, Content-Type, X-CSRF-Token"
 		Access-Control-Allow-Credentials true
 	}
+	rewrite /api/v1/* /{path}
 	reverse_proxy /api/* gateway:3001
 }
 
@@ -30,8 +31,7 @@ auth.localhost {
 		Access-Control-Allow-Headers "Authorization, Content-Type"
 		Access-Control-Allow-Credentials true
 	}
-	rewrite /api/v1/* /{path}
-	reverse_proxy /* auth:12345
+	reverse_proxy /api/* auth:12345
 }
 
 files.localhost {
