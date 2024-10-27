@@ -5,7 +5,7 @@ info:
   description: API для аутентификации и управления пользователями
 
 servers:
-  - url: auth.localhost/api/v1
+  - url: http://auth.localhost/api/v1
 
 paths:
   /register:

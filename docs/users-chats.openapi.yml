@@ -1,0 +1,276 @@
+openapi: 3.0.0
+info:
+  title: Users Service API
+  version: 1.0.0
+  description: API для управления пользователями и чатами
+
+servers:
+  - url: https://localhost/api/v1
+    description: Локальный сервер для разработки
+
+paths:
+  /users:
+    post:
+      tags:
+        - users
+      summary: Создание нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Идентификатор пользователя
+                name:
+                  type: string
+                  description: Имя пользователя
+                birthDate:
+                  type: string
+                  format: date-time
+                  description: Дата рождения пользователя
+              required:
+                - id
+                - name
+                - birthDate
+      responses:
+        '200':
+          description: Успешное создание пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+  /users/{id}:
+    get:
+      tags:
+        - users
+      summary: Получение информации о пользователе
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Идентификатор пользователя
+      responses:
+        '200':
+          description: Успешное получение информации о пользователе
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  avatar:
+                    type: string
+                    nullable: true
+                  birthDate:
+                    type: string
+                    format: date-time
+        '404':
+          description: Пользователь не найден
+
+    put:
+      tags:
+        - users
+      summary: Обновление информации о пользователе
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: true
+                avatar:
+                  type: string
+                  nullable: true
+                birthDate:
+                  type: string
+                  format: date-time
+                  nullable: true
+      responses:
+        '200':
+          description: Успешное обновление пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+    delete:
+      tags:
+        - users
+      summary: Удаление пользователя
+      responses:
+        '200':
+          description: Успешное удаление пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+  /chats:
+    post:
+      tags:
+        - chats
+      summary: Создание нового чата
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Название чата
+                userIDs:
+                  type: array
+                  items:
+                    type: string
+                  description: Идентификаторы пользователей, участвующих в чате
+              required:
+                - name
+                - userIDs
+      responses:
+        '200':
+          description: Успешное создание чата
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chatID:
+                    type: string
+                    example: "chat123"
+
+  /chats/{id}:
+    get:
+      tags:
+        - chats
+      summary: Получение информации о чате
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Идентификатор чата
+      responses:
+        '200':
+          description: Успешное получение информации о чате
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  chatName:
+                    type: string
+                    nullable: true
+                  avatar:
+                    type: string
+                    nullable: true
+                  members:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userID:
+                          type: string
+        '404':
+          description: Чат не найден
+
+    delete:
+      tags:
+        - chats
+      summary: Удаление чата
+      responses:
+        '200':
+          description: Успешное удаление чата
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+  /chats/{chatID}/users:
+    post:
+      tags:
+        - chats
+      summary: Добавление пользователя в чат
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: string
+                  description: Идентификатор пользователя
+              required:
+                - userID
+      responses:
+        '200':
+          description: Пользователь успешно добавлен в чат
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+    delete:
+      tags:
+        - chats
+      summary: Удаление пользователя из чата
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: string
+                  description: Идентификатор пользователя
+              required:
+                - userID
+      responses:
+        '200':
+          description: Пользователь успешно удален из чата
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true

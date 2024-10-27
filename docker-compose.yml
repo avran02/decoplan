@@ -26,23 +26,24 @@ services:
     volumes:
       - ./caddyfile:/etc/caddy/Caddyfile
     
-  # gateway:
-  #   image: avran02/decoplan-gateway
-  #   build:
-  #     context: gateway
-  #     dockerfile: dockerfile
-  #   environment:
-  #     - LOAD_DOT_ENV=false
-  #     - SERVER_LOG_LEVEL=${GATEWAY_SERVER_LOG_LEVEL}
-  #     - SERVER_PORT=${GATEWAY_SERVER_PORT}
-  #     - SERVER_HOST=${GATEWAY_SERVER_HOST}
-  #     - AUTH_SERVER_URL=${AUTH_SERVER_URL}
-  #   # ports:
-  #   #   - 3000:3000
-  #   expose:
-  #     - "${GATEWAY_SERVER_PORT}"
-  #   depends_on:
-  #     - auth
+  gateway:
+    image: avran02/decoplan-gateway
+    build:
+      context: gateway
+      dockerfile: dockerfile
+    environment:
+      - LOAD_DOT_ENV=false
+      - SERVER_LOG_LEVEL=${GATEWAY_SERVER_LOG_LEVEL}
+      - SERVER_PORT=${GATEWAY_SERVER_PORT}
+      - SERVER_HOST=${GATEWAY_SERVER_HOST}
+      - AUTH_SERVER_URL=${GATEWAY_AUTH_SERVER_URL}
+      - USERS_SERVER_URL=${GATEWAY_USERS_SERVER_URL}
+    # ports:
+    #   - 3000:3000
+    expose:
+      - "${GATEWAY_SERVER_PORT}"
+    depends_on:
+      - auth
 
   users:
     image: avran02/decoplan-users
