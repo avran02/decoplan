@@ -23,9 +23,16 @@ localhost {
 	reverse_proxy /api/* gateway:3001
 }
 
-# ws.localhost {
-# 	reverse_proxy chat:8888
-# }
+auth.localhost {
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "POST, OPTIONS"
+		Access-Control-Allow-Headers "Authorization, Content-Type"
+		Access-Control-Allow-Credentials true
+	}
+	rewrite /api/v1/* /{path}
+	reverse_proxy /* auth:12345
+}
 
 files.localhost {
 	header {
