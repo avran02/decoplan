@@ -36,10 +36,6 @@ type RemoveUserFromChatResponse struct {
 	Ok bool `json:"ok"`
 }
 
-type DeleteChatRequest struct {
-	ID string `json:"id"`
-}
-
 type DeleteChatResponse struct {
 	Ok bool `json:"ok"`
 }
