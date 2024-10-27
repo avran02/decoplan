@@ -9,6 +9,7 @@ import (
 	"github.com/avran02/decplan/gateway/internal/config"
 	"github.com/avran02/decplan/gateway/internal/controllers"
 	"github.com/avran02/decplan/gateway/internal/router"
+	"github.com/avran02/decplan/gateway/internal/services"
 	"github.com/avran02/decplan/gateway/logger"
 	"github.com/avran02/decplan/gateway/pb"
 	"google.golang.org/grpc"
@@ -34,8 +35,8 @@ func (a *App) Run() error {
 func New() *App {
 	conf := config.New()
 	logger.Setup(conf.Server)
-	// service := services.NewAuthService(connectAuthService(conf.AuthServiceUrl))
-	controller := controllers.New()
+	srv := services.NewUsersService(connectUsersService(conf.ExternalServices.UsersServiceUrl))
+	controller := controllers.New(srv)
 	router := router.New(controller)
 
 	return &App{
@@ -44,10 +45,20 @@ func New() *App {
 	}
 }
 
+func connectUsersService(endpoint string) pb.UsersServiceClient {
+	conn, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to connect to auth service: %s", err)
+	}
+
+	return pb.NewUsersServiceClient(conn)
+}
+
 func connectAuthService(endpoint string) pb.AuthServiceClient {
 	conn, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to auth service: %s", err)
 	}
+
 	return pb.NewAuthServiceClient(conn)
 }

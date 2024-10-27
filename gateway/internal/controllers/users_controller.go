@@ -106,6 +106,8 @@ func (c *usersController) DeleteUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func NewUsersController() UsersController {
-	return &usersController{}
+func newUsersController(srv services.UsersService) UsersController {
+	return &usersController{
+		s: srv,
+	}
 }

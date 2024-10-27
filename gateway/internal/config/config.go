@@ -15,7 +15,8 @@ type Config struct {
 }
 
 type ExternalServices struct {
-	AuthServiceUrl string
+	AuthServiceUrl  string
+	UsersServiceUrl string
 }
 
 type Server struct {
@@ -34,7 +35,8 @@ func New() *Config {
 
 	config := &Config{
 		ExternalServices: ExternalServices{
-			AuthServiceUrl: os.Getenv("AUTH_SERVER_URL"),
+			AuthServiceUrl:  os.Getenv("AUTH_SERVER_URL"),
+			UsersServiceUrl: os.Getenv("USERS_SERVER_URL"),
 		},
 		Server: Server{
 			LogLevel: os.Getenv("SERVER_LOG_LEVEL"),
