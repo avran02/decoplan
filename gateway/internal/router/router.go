@@ -9,31 +9,44 @@ import (
 
 type Router struct {
 	chi.Router
-	ac controllers.AuthController
+	uc controllers.UsersController
+	cc controllers.ChatsController
 }
 
-func (router *Router) getAuthRoutes() *chi.Mux {
+func (router *Router) getUsersRoutes() *chi.Mux {
 	r := chi.NewRouter()
-	r.Route("/api/v1/auth", func(r chi.Router) {
-		r.Post("/register", router.ac.Register)
-		r.Post("/login", router.ac.Login)
-		r.Post("/refresh", router.ac.RefreshTokens)
-		r.Post("/logout", router.ac.Logout)
+	r.Route("/users", func(r chi.Router) {
+		r.Post("/", router.uc.CreateUserHandler)
+		r.Get("/{id}", router.uc.GetUserHandler)
+		r.Put("/{id}", router.uc.UpdateUserHandler)
+		r.Delete("/{id}", router.uc.DeleteUserHandler)
+	})
+
+	r.Route("/chats", func(r chi.Router) {
+		r.Post("/", router.cc.CreateChatHandler)
+		r.Get("/{id}", router.cc.GetChatHandler)
+		r.Delete("/{id}", router.cc.DeleteChatHandler)
+
+		r.Route("/{chatID}/users", func(r chi.Router) {
+			r.Post("/", router.cc.AddUserToChatHandler)
+			r.Delete("/", router.cc.RemoveUserFromChatHandler)
+		})
 	})
 
 	return r
 }
 
-func New(controller controllers.AuthController) Router {
+func New(controller *controllers.Controller) Router {
 	r := Router{
-		ac: controller,
+		cc: controller.ChatsController(),
+		uc: controller.UsersController(),
 	}
 	main := chi.NewRouter()
 	main.Use(middleware.Logger)
 	main.Use(cors.Handler(allowAllCORS()))
 
-	filesRouter := r.getAuthRoutes()
-	main.Mount("/", filesRouter)
+	usersRoutes := r.getUsersRoutes()
+	main.Mount("/", usersRoutes)
 	r.Router = main
 	return r
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/avran02/decplan/gateway/internal/config"
 	"github.com/avran02/decplan/gateway/internal/controllers"
 	"github.com/avran02/decplan/gateway/internal/router"
-	"github.com/avran02/decplan/gateway/internal/services"
 	"github.com/avran02/decplan/gateway/logger"
 	"github.com/avran02/decplan/gateway/pb"
 	"google.golang.org/grpc"
@@ -35,8 +34,8 @@ func (a *App) Run() error {
 func New() *App {
 	conf := config.New()
 	logger.Setup(conf.Server)
-	service := services.NewAuthService(connectAuthService(conf.AuthServiceUrl))
-	controller := controllers.NewAuthController(service)
+	// service := services.NewAuthService(connectAuthService(conf.AuthServiceUrl))
+	controller := controllers.New()
 	router := router.New(controller)
 
 	return &App{
