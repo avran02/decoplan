@@ -26,23 +26,23 @@ services:
     volumes:
       - ./caddyfile:/etc/caddy/Caddyfile
     
-  gateway:
-    image: avran02/decoplan-gateway
-    build:
-      context: gateway
-      dockerfile: dockerfile
-    environment:
-      - LOAD_DOT_ENV=false
-      - SERVER_LOG_LEVEL=${GATEWAY_SERVER_LOG_LEVEL}
-      - SERVER_PORT=${GATEWAY_SERVER_PORT}
-      - SERVER_HOST=${GATEWAY_SERVER_HOST}
-      - AUTH_SERVER_URL=${AUTH_SERVER_URL}
-    # ports:
-    #   - 3000:3000
-    expose:
-      - "${GATEWAY_SERVER_PORT}"
-    depends_on:
-      - auth
+  # gateway:
+  #   image: avran02/decoplan-gateway
+  #   build:
+  #     context: gateway
+  #     dockerfile: dockerfile
+  #   environment:
+  #     - LOAD_DOT_ENV=false
+  #     - SERVER_LOG_LEVEL=${GATEWAY_SERVER_LOG_LEVEL}
+  #     - SERVER_PORT=${GATEWAY_SERVER_PORT}
+  #     - SERVER_HOST=${GATEWAY_SERVER_HOST}
+  #     - AUTH_SERVER_URL=${AUTH_SERVER_URL}
+  #   # ports:
+  #   #   - 3000:3000
+  #   expose:
+  #     - "${GATEWAY_SERVER_PORT}"
+  #   depends_on:
+  #     - auth
 
   users:
     image: avran02/decoplan-users
@@ -231,7 +231,7 @@ services:
   #     - ./data/redisinsight:/db
 
   auth:
-    image: avran/authentication:v0.2
+    image: avran/authentication:v0.3
     depends_on:
       - auth-mongo
     restart: always
@@ -242,15 +242,15 @@ services:
       - DB_HOST=${AUTH_DB_HOST}
       - DB_PORT=${AUTH_DB_PORT}
       - SERVER_HOST=${AUTH_SERVER_HOST}
-      - SERVER_PORT=${AUTH_SERVER_PORT}
+      - SERVER_GRPC_PORT=${AUTH_SERVER_GRPC_PORT}
+      - SERVER_HTTP_PORT=${AUTH_SERVER_HTTP_PORT}
       - SERVER_LOG_LEVEL=${AUTH_SERVER_LOG_LEVEL}
       - JWT_SECRET=${AUTH_JWT_SECRET}
       - JWT_ACCESS_EXP=${AUTH_JWT_ACCESS_EXP}
       - JWT_REFRESH_EXP=${AUTH_JWT_REFRESH_EXP}
-    # ports:
-    #   - ${AUTH_SERVER_PORT}:${AUTH_SERVER_PORT}
     expose:
-      - "${AUTH_SERVER_PORT}"
+      - "${AUTH_SERVER_GRPC_PORT}"
+      - "${AUTH_SERVER_HTTP_PORT}"
 
   auth-mongo:
     image: mongo
