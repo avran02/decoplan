@@ -13,18 +13,27 @@
 	}
 }
 
-localhost {
+http://localhost {
 	header {
 		Access-Control-Allow-Origin *
 		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "Authorization, Content-Type, X-CSRF-Token"
 		Access-Control-Allow-Credentials true
 	}
-	rewrite /api/v1/* /{path}
 	reverse_proxy /api/* gateway:3001
 }
 
-auth.localhost {
+https://localhost {
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+		Access-Control-Allow-Headers "Authorization, Content-Type, X-CSRF-Token"
+		Access-Control-Allow-Credentials true
+	}
+	reverse_proxy /api/* gateway:3001
+}
+
+http://auth.localhost {
 	header {
 		Access-Control-Allow-Origin *
 		Access-Control-Allow-Methods "POST, OPTIONS"
@@ -32,9 +41,33 @@ auth.localhost {
 		Access-Control-Allow-Credentials true
 	}
 	reverse_proxy /api/* auth:12345
+	reverse_proxy /docs/* auth:12345
+	reverse_proxy /swagger/* auth:12345
 }
 
-files.localhost {
+https://auth.localhost {
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "POST, OPTIONS"
+		Access-Control-Allow-Headers "Authorization, Content-Type"
+		Access-Control-Allow-Credentials true
+	}
+	reverse_proxy /api/* auth:12345
+	reverse_proxy /docs/* auth:12345
+	reverse_proxy /swagger/* auth:12345
+}
+
+https://files.localhost {
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+		Access-Control-Allow-Headers "Authorization, Content-Type, X-CSRF-Token"
+		Access-Control-Allow-Credentials true
+	}
+	reverse_proxy files:50051
+}
+
+http://files.localhost {
 	header {
 		Access-Control-Allow-Origin *
 		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
