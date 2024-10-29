@@ -1,4 +1,5 @@
 import { API_URL } from '@/constants/constants'
+import { getAccessToken } from '@/services/auth.helper'
 import axios, { CreateAxiosDefaults } from 'axios'
 import { getContentType } from './api.helper'
 
@@ -12,11 +13,11 @@ export const axiosClassic = axios.create(axiosOptions)
 
 export const instance = axios.create(axiosOptions)
 
-// instance.interceptors.request.use(config => {
-// 	const accessToken = getAccessToken()
+instance.interceptors.request.use(config => {
+	const accessToken = getAccessToken()
 
-// 	if (config?.headers && accessToken)
-// 		config.headers.Authorization = `Bearer ${accessToken}`
+	if (config?.headers && accessToken)
+		config.headers.Authorization = `Bearer ${accessToken}`
 
-// 	return config
-// })
+	return config
+})
