@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/avran02/decplan/gateway/internal/dto"
@@ -22,6 +23,7 @@ type usersController struct {
 }
 
 func (c *usersController) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+	slog.Info("usersController.CreateUserHandler")
 	var req dto.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apiError(w, http.StatusInternalServerError, err)
@@ -47,6 +49,7 @@ func (c *usersController) CreateUserHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (c *usersController) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	slog.Info("usersController.GetUserHandler")
 	user, err := c.s.GetUser(r.Context(), chi.URLParam(r, enum.UserID.String()))
 	if err != nil {
 		apiError(w, http.StatusInternalServerError, fmt.Errorf("failed to make gRPC call: %w", err))
@@ -64,6 +67,7 @@ func (c *usersController) GetUserHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *usersController) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	slog.Info("usersController.UpdateUserHandler")
 	var req dto.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apiError(w, http.StatusInternalServerError, err)
@@ -90,6 +94,7 @@ func (c *usersController) UpdateUserHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (c *usersController) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	slog.Info("usersController.DeleteUserHandler")
 	if err := c.s.DeleteUser(
 		r.Context(),
 		chi.URLParam(r, enum.UserID.String()),

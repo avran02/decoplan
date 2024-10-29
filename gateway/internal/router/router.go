@@ -1,6 +1,11 @@
 package router
 
 import (
+	"fmt"
+	"log"
+	"log/slog"
+	"net/http"
+
 	"github.com/avran02/decplan/gateway/internal/controllers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -46,7 +51,21 @@ func New(controller *controllers.Controller) Router {
 	main.Use(cors.Handler(allowAllCORS()))
 
 	usersRoutes := r.getUsersRoutes()
-	main.Mount("/", usersRoutes)
+	main.Mount("/api/v1", usersRoutes)
 	r.Router = main
+	printRoutes(r.Router)
 	return r
+}
+
+func printRoutes(router chi.Routes) {
+	slog.Debug("Serving routes:")
+	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+		loggingStr := fmt.Sprintf("Method: %s, Route: %s", method, route)
+		slog.Debug(loggingStr)
+		return nil
+	}
+
+	if err := chi.Walk(router, walkFunc); err != nil {
+		log.Fatal(err)
+	}
 }
