@@ -1,13 +1,13 @@
 import { axiosClassic } from '@/api/axios'
 import { IFormLogin, IFormRegister } from '@/types/auth.types'
-import { removeFromStorage, saveTokenStorage } from './auth.helper'
+import { getAccessToken, removeFromStorage, saveTokenStorage } from './auth.helper'
 
 interface IAuthResponse {
 	accessToken: string
-	refreshToken: string
 }
 interface IRegister {
-	access: boolean
+	id: string
+	accessToken: string
 }
 
 export enum EnumTokens {
@@ -16,9 +16,9 @@ export enum EnumTokens {
 }
 
 class AuthService {
-	async login( data: IFormLogin) {
+	async login( data: IFormLogin ) {
 		const response = await axiosClassic.post<IAuthResponse>(
-			`/auth/login`,
+			`/login`,
 			data
 		)
 
@@ -27,27 +27,40 @@ class AuthService {
 		return response
 	}
 
-	async register( data: IFormRegister) {
+	async register( data: IFormRegister ) {
 		const response = await axiosClassic.post<IRegister>(
-			`/auth/register`,
+			`/register`,
 			data
 		)
+
+		if (response.data.accessToken) saveTokenStorage(response.data.accessToken)
+		
+			console.log(response.data)
+
 		return response
 	}
 
 
 	async getNewTokens(refreshToken: string) {
 		const response = await axiosClassic.post<IAuthResponse>(
-			'/auth/refresh',
+			'/refresh-token',
 			refreshToken
 		)
 		return response.data
 	}
 
 	async logout() {
-		const response = await axiosClassic.post<boolean>('/auth/logout')
+		const accessToken = getAccessToken()
+		console.log(accessToken);
+		
+		const response = await axiosClassic.post<boolean>('/logout', 
+			{"accessToken" : accessToken}
+		)
+		console.log(response)
+		
 
 		if (response.data) removeFromStorage()
+
 
 		return response
 	}
