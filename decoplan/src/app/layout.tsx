@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import localFont from "next/font/local"
+import { Toaster } from "react-hot-toast"
 import "./globals.scss"
 import { Providers } from "./Providers"
 
@@ -33,6 +34,7 @@ export default function RootLayout({
 		<html lang='en'>
 			<body className={`${Monocraft.variable} antialiased`}>
 				<Providers>{children}</Providers>
+				<Toaster position='top-right' />
 			</body>
 		</html>
 	)
