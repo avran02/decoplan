@@ -258,7 +258,8 @@ services:
     expose:
       - "${AUTH_SERVER_GRPC_PORT}"
       - "${AUTH_SERVER_HTTP_PORT}"
-
+    volumes:
+      - ./auth/config.yml:/app/config.yml
   auth-mongo:
     image: mongo
     restart: unless-stopped
