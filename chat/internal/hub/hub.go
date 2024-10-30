@@ -1,6 +1,7 @@
 package hub
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log/slog"
@@ -24,6 +25,8 @@ var (
 			return true
 		},
 	}
+	newline = []byte{'\n'}
+	space   = []byte{' '}
 )
 
 type WebsocketHub interface {
@@ -109,6 +112,7 @@ func (hub *websocketHub) handleClientMessage(conn *websocket.Conn) {
 			slog.Error("error reading message", "error", err)
 			break
 		}
+		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
 		var userMsg dto.UserRequestDto
 		if err := json.Unmarshal(message, &userMsg); err != nil {
@@ -129,7 +133,7 @@ func (hub *websocketHub) handleClientMessage(conn *websocket.Conn) {
 
 // controllers
 func (hub *websocketHub) userSendMessageController(conn *websocket.Conn, payload []byte) {
-	slog.Debug("userSendMessageController", "payload", string(payload), "conn", conn)
+	slog.Debug("userSendMessageController", "payload", string(payload))
 	var req dto.NewMessageDto
 	if err := json.Unmarshal(payload, &req); err != nil {
 		slog.Error("failed to unmarshal message", "error", err)

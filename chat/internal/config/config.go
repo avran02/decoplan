@@ -40,7 +40,7 @@ func New() *Config {
 		},
 		ExternalServices: ExternalServices{
 			AuthURL:    os.Getenv("AUTH_SERVER_URL"),
-			StorageURL: os.Getenv("STORAGE_SERVER_URL"),
+			StorageURL: os.Getenv("CHAT_STORAGE_SERVER_URL"),
 			UsersURL:   os.Getenv("USERS_SERVER_URL"),
 		},
 	}
