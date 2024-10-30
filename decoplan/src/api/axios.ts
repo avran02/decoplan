@@ -1,7 +1,9 @@
 import { API_URL } from '@/constants/constants'
-import { getAccessToken } from '@/services/auth.helper'
+import { getAccessToken, removeFromStorage } from '@/services/auth.helper'
+import authService, { EnumTokens } from '@/services/auth.service'
 import axios, { CreateAxiosDefaults } from 'axios'
-import { getContentType } from './api.helper'
+import Cookies from 'js-cookie'
+import { errorCatch, getContentType } from './api.helper'
 
 const axiosOptions: CreateAxiosDefaults = {
 	baseURL: API_URL,
@@ -21,3 +23,30 @@ instance.interceptors.request.use(config => {
 
 	return config
 })
+
+instance.interceptors.response.use(
+	config => config,
+	async error => {
+		const originalRequest = error.config
+
+		if (
+			(error?.response?.status === 401 ||
+				errorCatch(error) === 'Invalid or expired refresh token') &&
+			error.config &&
+			!error.config._isRetry
+		) {
+			originalRequest._isRetry = true
+			try {
+				await authService.getNewTokens(Cookies.get(EnumTokens.REFRESH_TOKEN) as string)
+				return instance.request(originalRequest)
+			} catch (error) {
+				if (
+					errorCatch(error) === 'Invalid or expired refresh token'
+				)
+					removeFromStorage()
+			}
+		}
+
+		throw error
+	}
+)
