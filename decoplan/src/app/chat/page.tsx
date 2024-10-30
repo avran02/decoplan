@@ -1,4 +1,5 @@
 "use client"
+import { Chat } from "@/components/screens/chat/Chat"
 // import { Chat } from "@/components/screens/chat/Chat"
 import { getAccessToken } from "@/services/auth.helper"
 import authService from "@/services/auth.service"
@@ -8,7 +9,7 @@ import { useRouter } from "next/navigation"
 import useWebSocket from "react-use-websocket"
 
 export default function ChatPage() {
-	const accessToken = getAccessToken() || ""
+	const accessToken = getAccessToken() as string
 	const { push } = useRouter()
 	const { sendMessage, lastMessage, readyState } = useWebSocket(
 		"ws://localhost:57151/ws/orderbook"
@@ -22,14 +23,11 @@ export default function ChatPage() {
 	})
 	return (
 		<div>
-			{/* <Chat token={accessToken} chatId={"1"} /> */}
+			<Chat token={accessToken} chatId={"1"} />
 
 			<button onClick={() => mutateLogout()}>
 				<LogOut />
 			</button>
 		</div>
-		// <div className='w-8/5 border-r border-border h-full'>
-		// 	<MessageField />
-		// </div>
 	)
 }

@@ -1,34 +1,34 @@
 // types.ts
-export interface Attachment {
+export interface IAttachment {
   id: string;
   url: string;
 }
 
-export interface MessageContent {
+export interface IMessageContent {
   text: string;
-  attachments?: Attachment[];
+  attachments?: IAttachment[];
 }
 
-export interface Message {
+export interface IMessage {
   id: string;
   sender: string;
-  content: MessageContent;
+  content: IMessageContent;
   timestamp: string;
 }
 
-export interface AskMessagesDto {
+export interface IAskMessagesDto {
   chatId: string;
   limit?: number;
   offset?: number;
 }
 
-export interface DeleteMessageDto {
+export interface IDeleteMessageDto {
   chatId: string;
   messageId: number;
 }
 
-export interface NewMessageDto {
+export interface INewMessageDto {
   chatId: string;
-  content: MessageContent;
+  content: IMessageContent;
   timestamp: string;
 }
