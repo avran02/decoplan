@@ -3,18 +3,24 @@ import { ArrowRightToLine, Send } from "lucide-react"
 import { useState } from "react"
 import Field from "../../ui/field/Field"
 
-interface IMessageField {}
+interface IMessageField {
+	onSendMessage: (message: string) => void
+}
 
-export function MessageField({}: IMessageField) {
+export function MessageField({ onSendMessage }: IMessageField) {
 	const [message, setMessage] = useState<string>("")
 
 	const onSubmit = () => {
-		message && setMessage("Хуй")
+		if (message.trim()) {
+			onSendMessage(message.trim())
+			setMessage("")
+		}
 	}
+
 	return (
 		<div className='border-t border-border p-layout flex items-center justify-between'>
 			<Field
-				className='w-4/5 bg-red-500'
+				className='w-full'
 				placeholder='Write a message...'
 				Icon={ArrowRightToLine}
 				value={message}
