@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strings"
 	"sync"
 
 	"github.com/avran02/decoplan/chat/enum"
@@ -43,20 +42,8 @@ type websocketHub struct {
 func (hub *websocketHub) RegisterWebsocket(w http.ResponseWriter, r *http.Request) {
 	hub.mu.Lock()
 	defer hub.mu.Unlock()
-	tokenHeader := r.Header.Get("Authorization")
-	slog.Debug("hub.RegisterWebsocket", "Authorization", tokenHeader)
-	if tokenHeader == "" {
-		http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
-		return
-	}
 
-	bearerToken := strings.TrimPrefix(tokenHeader, "Bearer ")
-	if bearerToken == tokenHeader {
-		slog.Error("hub.RegisterWebsocket", "error", "mismatching tokenHeader and bearerToken")
-		http.Error(w, "Invalid token format", http.StatusUnauthorized)
-		return
-	}
-
+	bearerToken := r.URL.Query().Get("token")
 	id, err := hub.service.ValidateToken(r.Context(), bearerToken)
 	if err != nil {
 		slog.Error("hub.RegisterWebsocket failed to validate token", "error", err.Error())
