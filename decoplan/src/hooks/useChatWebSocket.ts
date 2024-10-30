@@ -1,6 +1,6 @@
 // useChatWebSocket.ts
 import { WS_URL } from '@/constants/constants'
-import { IAskMessagesDto, IDeleteMessageDto, IMessage, INewMessageDto } from '@/types/chat.types'
+import { IAskMessagesDto, IDeleteMessageDto, IMessage, INewMessageDto, UserMessages } from '@/types/chat.types'
 import { useCallback, useEffect, useState } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 
@@ -9,7 +9,6 @@ const useChatWebSocket = (token: string) => {
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(WS_URL, {
     onOpen: () => console.log('WebSocket Connection Opened'),
     onClose: () => console.log('WebSocket Connection Closed'),
-    protocols: [ token ],
     queryParams: { token },
     shouldReconnect: () => true,
   });
@@ -37,17 +36,17 @@ const useChatWebSocket = (token: string) => {
 
   // Отправка нового сообщения
   const sendMessage = useCallback((messageData: INewMessageDto) => {
-    sendJsonMessage({ type: 'new_message', data: messageData });
+    sendJsonMessage({ act: UserMessages.USER_SEND_MESSAGE, payload: messageData });
   }, [sendJsonMessage]);
 
   // Получение списка сообщений
   const fetchMessages = useCallback((data: IAskMessagesDto) => {
-    sendJsonMessage({ type: 'fetch_messages', data });
+    sendJsonMessage({ act: UserMessages.USER_GET_MESSAGES, payload: data });
   }, [sendJsonMessage]);
 
   // Удаление сообщения
   const deleteMessage = useCallback((data: IDeleteMessageDto) => {
-    sendJsonMessage({ type: 'delete_message', data });
+    sendJsonMessage({ act: UserMessages.USER_DELETE_MESSAGE, payload: data });
   }, [sendJsonMessage]);
 
   return {
