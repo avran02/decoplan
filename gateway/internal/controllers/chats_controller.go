@@ -27,7 +27,7 @@ type chatsController struct {
 func (c *chatsController) CreateChatHandler(w http.ResponseWriter, r *http.Request) {
 	slog.Info("chatsController.CreateChatHandler")
 	var req dto.CreateChatRequest
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apiError(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -82,7 +82,7 @@ func (c *chatsController) DeleteChatHandler(w http.ResponseWriter, r *http.Reque
 func (c *chatsController) RemoveUserFromChatHandler(w http.ResponseWriter, r *http.Request) {
 	slog.Info("chatsController.RemoveUserFromChatHandler")
 	var req dto.RemoveUserFromChatRequest
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apiError(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -107,7 +107,7 @@ func (c *chatsController) RemoveUserFromChatHandler(w http.ResponseWriter, r *ht
 func (c *chatsController) AddUserToChatHandler(w http.ResponseWriter, r *http.Request) {
 	slog.Info("chatsController.AddUserToChatHandler")
 	var req dto.AddUserToChatRequest
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apiError(w, http.StatusInternalServerError, err)
 		return
 	}
