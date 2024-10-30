@@ -26,9 +26,15 @@ export interface IDeleteMessageDto {
   chatId: string;
   messageId: number;
 }
-
 export interface INewMessageDto {
   chatId: string;
   content: IMessageContent;
   timestamp: string;
+}
+
+
+export enum UserMessages {
+  USER_GET_MESSAGES = "0",
+  USER_SEND_MESSAGE = "1",
+  USER_DELETE_MESSAGE = "2",
 }
