@@ -18,7 +18,7 @@ type Repository interface {
 	AddUserToChat(ctx context.Context, ug models.UserChat) error
 	CreateChat(ctx context.Context, name, chatID string, userIDs []string) error
 	DeleteChat(ctx context.Context, chatID string) error
-	GetChat(ctx context.Context, chatID string) (models.Chat, error)
+	GetChat(ctx context.Context, chatID string) (*models.Chat, error)
 	RemoveUserFromChat(ctx context.Context, ug models.UserChat) error
 	DeleteUser(ctx context.Context, userID string) error
 	GetUser(ctx context.Context, userID string) (models.User, error)
@@ -152,30 +152,35 @@ func (p *postgres) CreateChat(ctx context.Context, name, chatID string, userIDs 
 	return nil
 }
 
-func (p *postgres) GetChat(ctx context.Context, chatID string) (models.Chat, error) {
-	query := `SELECT g.id, g.name, g.avatar_url, u.user_id FROM chats g 
-              LEFT JOIN user_chats u ON g.id = u.chat_id
-              WHERE g.id = $1`
+func (p *postgres) GetChat(ctx context.Context, chatID string) (*models.Chat, error) {
+	query := `SELECT c.id, c.name, c.avatar_url, u.user_id FROM chats c 
+              JOIN user_chats u ON c.id = u.chat_id
+              WHERE c.id = $1`
 
 	rows, err := p.db.QueryContext(ctx, query, chatID)
 	if err != nil {
-		return models.Chat{}, fmt.Errorf("failed to get chat: %w", err)
+		return nil, fmt.Errorf("failed to get chat: %w", err)
 	}
 	defer rows.Close()
 
 	var members []*models.User
 	var chatIDOut, chatName string
 	var avatar sql.NullString
-
+	numRows := 0
+	slog.Info(fmt.Sprint(rows.Err()))
 	for rows.Next() {
+		numRows++
 		var userID string
 		if err := rows.Scan(&chatIDOut, &chatName, &avatar, &userID); err != nil {
-			return models.Chat{}, fmt.Errorf("failed to get chat: %w", err)
+			return nil, fmt.Errorf("failed to get chat: %w", err)
 		}
 		members = append(members, &models.User{ID: userID})
 	}
+	if numRows == 0 {
+		return nil, sql.ErrNoRows
+	}
 
-	return models.Chat{
+	return &models.Chat{
 		ID:      chatIDOut,
 		Name:    chatName,
 		Avatar:  &avatar.String,

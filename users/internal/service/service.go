@@ -14,7 +14,7 @@ type UserService interface {
 	AddUserToChat(ctx context.Context, userChat models.UserChat) error
 	CreateChat(ctx context.Context, name string, userIDs []string) (string, error)
 	DeleteChat(ctx context.Context, chatID string) error
-	GetChat(ctx context.Context, chatID string) (models.Chat, error)
+	GetChat(ctx context.Context, chatID string) (*models.Chat, error)
 	RemoveUserFromChat(ctx context.Context, userChat models.UserChat) error
 	CreateUser(ctx context.Context, id, name string, birthDate time.Time) error
 	DeleteUser(ctx context.Context, userID string) error
@@ -44,7 +44,7 @@ func (s *userService) DeleteChat(ctx context.Context, chatID string) error {
 
 }
 
-func (s *userService) GetChat(ctx context.Context, chatID string) (models.Chat, error) {
+func (s *userService) GetChat(ctx context.Context, chatID string) (*models.Chat, error) {
 	return s.repo.GetChat(ctx, chatID)
 }
 
