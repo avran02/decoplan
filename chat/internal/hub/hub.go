@@ -35,8 +35,8 @@ type WebsocketHub interface {
 }
 
 type websocketHub struct {
-	clients  map[string]models.WebsocketClient // map[remoteAddr]models.WebsocketClient
-	clients2 map[string]string                 // map[userID]remoteAddr
+	clients   map[string]models.WebsocketClient // map[remoteAddr]models.WebsocketClient
+	clientIPs map[string]string                 // map[userID]remoteAddr
 
 	service service.Service
 	mu      sync.RWMutex
@@ -64,6 +64,8 @@ func (hub *websocketHub) RegisterWebsocket(w http.ResponseWriter, r *http.Reques
 		Conn:   conn,
 		UserID: id,
 	}
+	hub.clientIPs[id] = r.RemoteAddr
+
 	go hub.handleClientMessage(conn)
 }
 
@@ -98,8 +100,9 @@ func (hub *websocketHub) broadcastMessage(message []byte, chatID, userID string)
 	}
 
 	for _, id := range clientIds {
-		if err := hub.SendMessage(id, message); err != nil {
-			slog.Error("failed to send message to client", "error", err.Error())
+		if err := hub.SendMessage(hub.clientIPs[id], message); err != nil {
+			slog.Error("failed to send message to client", "error", err.Error(), "client", id)
+			slog.Debug("hub", "clients", hub.clients, "clientIPs", hub.clientIPs)
 		}
 	}
 }
@@ -193,8 +196,9 @@ func (hub *websocketHub) userAsksMessagesController(conn *websocket.Conn, payloa
 
 func New(service service.Service) WebsocketHub {
 	return &websocketHub{
-		clients: make(map[string]models.WebsocketClient),
-		service: service,
-		mu:      sync.RWMutex{},
+		clients:   make(map[string]models.WebsocketClient),
+		clientIPs: make(map[string]string),
+		service:   service,
+		mu:        sync.RWMutex{},
 	}
 }
