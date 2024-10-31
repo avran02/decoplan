@@ -19,6 +19,7 @@ export function Chat({ token, chatId }: ChatProps) {
 	useEffect(() => {
 		connect()
 		fetchMessages({ chatId, limit: 100, offset: 0 })
+		console.log(messages)
 	}, [chatId, fetchMessages])
 
 	const handleSendMessage = (text: string) => {
@@ -40,6 +41,7 @@ export function Chat({ token, chatId }: ChatProps) {
 		setAttachments((prev) => [...prev, attachment])
 	}
 
+	console.log(messages)
 	return (
 		<div
 			className='h-full grid'
@@ -53,8 +55,8 @@ export function Chat({ token, chatId }: ChatProps) {
 				<>
 					{/* <ChatHeader correspondent={correspondent} /> */}
 					<div className='p-layout border-t border-border'>
-						{messages.map((message) => (
-							<Message key={message.id} message={message} />
+						{messages.map((message, i) => (
+							<Message key={i} message={message} />
 						))}
 					</div>
 				</>

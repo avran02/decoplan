@@ -20,7 +20,7 @@ export function Message({ message }: { message: IMessage }) {
 								: "rounded-tl-none bg-border"
 						}`}
 					>
-						{message.content.text}
+						{message.id}
 					</div>
 					<div
 						className={`text-xs opacity-30 block mt-1.5 ${
