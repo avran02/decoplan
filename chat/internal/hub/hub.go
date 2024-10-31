@@ -100,7 +100,14 @@ func (hub *websocketHub) broadcastMessage(message []byte, chatID, userID string)
 	}
 
 	for _, id := range clientIds {
-		if err := hub.SendMessage(hub.clientIPs[id], message); err != nil {
+		if id == userID {
+			continue
+		}
+		clientIP, exists := hub.clientIPs[id]
+		if !exists {
+			continue
+		}
+		if err := hub.SendMessage(clientIP, message); err != nil {
 			slog.Error("failed to send message to client", "error", err.Error(), "client", id)
 			slog.Debug("hub", "clients", hub.clients, "clientIPs", hub.clientIPs)
 		}
@@ -142,15 +149,20 @@ func (hub *websocketHub) userSendMessageController(conn *websocket.Conn, payload
 		slog.Error("failed to unmarshal message", "error", err)
 		return
 	}
-	msgpb := mapper.SaveMessageHttpRequestToPb(req)
-
+	msgpb := mapper.SaveMessageHttpRequestToPb(req, hub.clients[conn.RemoteAddr().String()].UserID)
 	if err := hub.service.SaveMessage(context.Background(), msgpb); err != nil {
 		slog.Error("failed to save message", "error", err)
 		return
 	}
+	resp := mapper.PbMsgToModel(msgpb)
+	rawResp, err := json.Marshal(resp)
+	if err != nil {
+		slog.Error("failed to marshal message", "error", err)
+		return
+	}
 
 	addr := conn.RemoteAddr().String()
-	hub.broadcastMessage(payload, req.ChatID, hub.clients[addr].UserID)
+	hub.broadcastMessage(rawResp, req.ChatID, hub.clients[addr].UserID)
 }
 
 func (hub *websocketHub) userDeleteMessageController(conn *websocket.Conn, payload []byte) {

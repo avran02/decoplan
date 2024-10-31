@@ -20,7 +20,7 @@ func PbMsgToModel(msg *storagepb.Message) models.Message {
 	return models.Message{
 		ID:     msg.GetId(),
 		ChatID: msg.GetChatId(),
-		Sender: msg.GetContent(),
+		Sender: msg.GetSender(),
 		Content: models.Content{
 			Attachments: attachments,
 			Text:        msg.GetContent(),

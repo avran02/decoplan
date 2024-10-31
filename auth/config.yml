@@ -8,3 +8,9 @@ cors:
   allowed_headers:
     - "*"
   allow_credentials: true
+cookie:
+  domain: auth.localhost
+  http_only: true
+  secure: true
+  same_site: "none"
+  partitioned: true

@@ -6,7 +6,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func SaveMessageHttpRequestToPb(req dto.NewMessageDto) *storagepb.Message {
+func SaveMessageHttpRequestToPb(req dto.NewMessageDto, sender string) *storagepb.Message {
 	attachments := make([]*storagepb.Attachment, 0, len(req.Content.Attachments))
 	for _, attachment := range req.Content.Attachments {
 		attachments = append(attachments, &storagepb.Attachment{
@@ -18,6 +18,7 @@ func SaveMessageHttpRequestToPb(req dto.NewMessageDto) *storagepb.Message {
 
 	return &storagepb.Message{
 		ChatId:      req.ChatID,
+		Sender:      sender,
 		Content:     req.Content.Text,
 		Attachments: attachments,
 		CreatedAt:   timestamppb.Now(),
