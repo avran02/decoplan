@@ -34,7 +34,7 @@ export interface INewMessageDto {
 
 
 export enum UserMessages {
-  USER_GET_MESSAGES = "0",
-  USER_SEND_MESSAGE = "1",
-  USER_DELETE_MESSAGE = "2",
+  USER_GET_MESSAGES = 0,
+  USER_SEND_MESSAGE = 1,
+  USER_DELETE_MESSAGE = 2,
 }
