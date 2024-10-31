@@ -47,3 +47,4 @@ _testmain.go
 .env
 */.env
 local-dev/
+decoplan/bun.lockb
