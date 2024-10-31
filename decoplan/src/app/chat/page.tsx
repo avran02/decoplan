@@ -23,7 +23,10 @@ export default function ChatPage() {
 	})
 	return (
 		<div className='h-screen w-screen flex flex-col'>
-			<Chat token={accessToken} chatId={"1"} />
+			<Chat
+				token={accessToken}
+				chatId={"4a138519-2836-4ffc-acfe-e21f2558bf9d"}
+			/>
 
 			<button onClick={() => mutateLogout()}>
 				<LogOut />
