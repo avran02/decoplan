@@ -154,7 +154,7 @@ func (hub *websocketHub) userSendMessageController(conn *websocket.Conn, payload
 }
 
 func (hub *websocketHub) userDeleteMessageController(conn *websocket.Conn, payload []byte) {
-	slog.Debug("userDeleteMessageController", "payload", string(payload), "conn", conn)
+	slog.Debug("userDeleteMessageController", "payload", string(payload))
 	var req dto.DeleteMessageDto
 	if err := json.Unmarshal(payload, &req); err != nil {
 		slog.Error("failed to unmarshal message", "error", err)
@@ -171,7 +171,7 @@ func (hub *websocketHub) userDeleteMessageController(conn *websocket.Conn, paylo
 }
 
 func (hub *websocketHub) userAsksMessagesController(conn *websocket.Conn, payload []byte) {
-	slog.Debug("userAsksMessagesController", "payload", string(payload), "conn", conn)
+	slog.Debug("userAsksMessagesController", "payload", string(payload))
 	var req dto.AskMessagesDto
 	if err := json.Unmarshal(payload, &req); err != nil {
 		slog.Error("failed to unmarshal message", "error", err)

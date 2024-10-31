@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/avran02/decoplan/chat/internal/mapper"
 	"github.com/avran02/decoplan/chat/internal/models"
 	authpb "github.com/avran02/decoplan/chat/pb/auth"
 	storagepb "github.com/avran02/decoplan/chat/pb/chat_storage"
@@ -62,12 +63,7 @@ func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset 
 	}
 	messages := make([]models.Message, 0, len(resp.GetMessages()))
 	for _, message := range resp.GetMessages() {
-		messages = append(messages, models.Message{
-			ID:        message.GetId(),
-			ChatID:    message.GetChatId(),
-			Content:   message.GetContent(),
-			CreatedAt: message.GetCreatedAt().AsTime(),
-		})
+		messages = append(messages, mapper.PbMsgToModel(message))
 	}
 	return messages, nil
 }

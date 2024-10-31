@@ -9,10 +9,8 @@ type Message struct {
 	ID     uint64 `json:"id"`
 	ChatID string `json:"chatId"`
 
-	Sender  string `json:"sender"`
-	Content string `json:"content"`
-
-	Attachments []Attachment `json:"attachments"`
+	Sender  string  `json:"sender"`
+	Content Content `json:"content"`
 
 	CreatedAt time.Time  `json:"createdAt"`
 	DeletedAt *time.Time `json:"deletedAt"`
@@ -23,6 +21,11 @@ func (m Message) MarshalBinary() ([]byte, error) {
 }
 func (m *Message) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, &m)
+}
+
+type Content struct {
+	Text        string       `json:"text"`
+	Attachments []Attachment `json:"attachments"`
 }
 
 type Attachment struct {
