@@ -10,8 +10,9 @@ import (
 )
 
 type Config struct {
-	Minio  Minio
-	Server Server
+	Minio            Minio
+	Server           Server
+	ExternalServices ExternalServices
 }
 
 type Minio struct {
@@ -24,6 +25,10 @@ type Server struct {
 	LogLevel string
 	Port     string
 	Host     string
+}
+
+type ExternalServices struct {
+	AuthServiceURL string
 }
 
 func New() *Config {
@@ -44,6 +49,9 @@ func New() *Config {
 			LogLevel: os.Getenv("SERVER_LOG_LEVEL"),
 			Port:     os.Getenv("SERVER_PORT"),
 			Host:     os.Getenv("SERVER_HOST"),
+		},
+		ExternalServices: ExternalServices{
+			AuthServiceURL: os.Getenv("AUTH_SERVER_URL"),
 		},
 	}
 	slog.Debug(fmt.Sprintf("config: %+v", config))

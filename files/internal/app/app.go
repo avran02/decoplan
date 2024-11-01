@@ -2,14 +2,19 @@ package app
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 
 	"github.com/avran02/decoplan/files/internal/config"
 	"github.com/avran02/decoplan/files/internal/controller"
+	"github.com/avran02/decoplan/files/internal/middleware"
 	"github.com/avran02/decoplan/files/internal/router"
 	"github.com/avran02/decoplan/files/internal/service"
 	"github.com/avran02/decoplan/files/logger"
+	"github.com/avran02/decoplan/files/pb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type App struct {
@@ -33,10 +38,19 @@ func New() *App {
 	logger.Setup(conf.Server)
 	service := service.New(conf.Minio)
 	controller := controller.New(service)
-	router := router.New(controller)
+	authMiddleware := middleware.NewAuthMiddleware(mustConnectExternalServices(conf))
+	router := router.New(controller, authMiddleware)
 
 	return &App{
 		config: conf,
 		router: router,
 	}
+}
+
+func mustConnectExternalServices(config *config.Config) pb.AuthServiceClient {
+	conn, err := grpc.NewClient(config.ExternalServices.AuthServiceURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to connect to auth service: %s", err)
+	}
+	return pb.NewAuthServiceClient(conn)
 }

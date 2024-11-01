@@ -6,7 +6,10 @@ import (
 	"net/http"
 
 	"github.com/avran02/decoplan/files/internal/controller"
+	AuthMiddleware "github.com/avran02/decoplan/files/internal/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 type Router struct {
@@ -25,11 +28,15 @@ func (r Router) getFilesRoutes() *chi.Mux {
 	return router
 }
 
-func New(controller controller.FilesController) Router {
+func New(controller controller.FilesController, m *AuthMiddleware.AuthMiddleware) Router {
 	r := Router{
 		controller: controller,
 	}
 	main := chi.NewRouter()
+	main.Use(middleware.Logger)
+	main.Use(cors.Handler(allowAllCORS()))
+	main.Use(m.Middleware)
+	main.Use(middleware.Recoverer)
 
 	filesRouter := r.getFilesRoutes()
 	main.Mount("/", filesRouter)
