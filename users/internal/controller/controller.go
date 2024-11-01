@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/avran02/decoplan/users/internal/models"
 	"github.com/avran02/decoplan/users/internal/service"
@@ -14,6 +15,7 @@ type UserController struct {
 }
 
 func (c *UserController) AddUserToChat(ctx context.Context, req *pb.AddUserToChatRequest) (*pb.AddUserToChatResponse, error) {
+	slog.Info("UserController.AddUsrToChat")
 	if err := c.service.AddUserToChat(ctx, models.UserChat{
 		ChatID: req.ChatID,
 		UserID: req.UserID,
@@ -25,6 +27,7 @@ func (c *UserController) AddUserToChat(ctx context.Context, req *pb.AddUserToCha
 }
 
 func (c *UserController) CreateChat(ctx context.Context, req *pb.CreateChatRequest) (*pb.CreateChatResponse, error) {
+	slog.Info("UserController.CreateChat")
 	chatID, err := c.service.CreateChat(ctx, req.GetName(), req.GetUserIDs())
 	if err != nil {
 		return nil, err
@@ -34,6 +37,7 @@ func (c *UserController) CreateChat(ctx context.Context, req *pb.CreateChatReque
 }
 
 func (c *UserController) DeleteChat(ctx context.Context, req *pb.DeleteChatRequest) (*pb.DeleteChatResponse, error) {
+	slog.Info("UserController.DeleteChat")
 	if err := c.service.DeleteChat(ctx, req.GetId()); err != nil {
 		return nil, err
 	}
@@ -42,6 +46,7 @@ func (c *UserController) DeleteChat(ctx context.Context, req *pb.DeleteChatReque
 }
 
 func (c *UserController) GetChat(ctx context.Context, req *pb.GetChatRequest) (*pb.GetChatResponse, error) {
+	slog.Info("UserController.GetChat")
 	chat, err := c.service.GetChat(ctx, req.GetId())
 	if err != nil {
 		return nil, err
@@ -63,6 +68,7 @@ func (c *UserController) GetChat(ctx context.Context, req *pb.GetChatRequest) (*
 }
 
 func (c *UserController) RemoveUserFromChat(ctx context.Context, req *pb.RemoveUserFromChatRequest) (*pb.RemoveUserFromChatResponse, error) {
+	slog.Info("UserController.RemoveUserFromChat")
 	if err := c.service.RemoveUserFromChat(ctx, models.UserChat{
 		ChatID: req.ChatID,
 		UserID: req.UserID,
@@ -73,6 +79,7 @@ func (c *UserController) RemoveUserFromChat(ctx context.Context, req *pb.RemoveU
 	return &pb.RemoveUserFromChatResponse{Ok: true}, nil
 }
 func (c *UserController) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	slog.Info("UserController.CreateUser")
 	if err := c.service.CreateUser(ctx, req.GetId(), req.GetName(), req.BirthDate.AsTime()); err != nil {
 		return nil, err
 	}
@@ -81,6 +88,7 @@ func (c *UserController) CreateUser(ctx context.Context, req *pb.CreateUserReque
 }
 
 func (c *UserController) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	slog.Info("UserController.GetUser")
 	user, err := c.service.GetUser(ctx, req.GetId())
 	if err != nil {
 		return nil, err
@@ -95,6 +103,7 @@ func (c *UserController) GetUser(ctx context.Context, req *pb.GetUserRequest) (*
 }
 
 func (c *UserController) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
+	slog.Info("UserController.UpdateUser")
 	name := req.Name
 	birthDate := req.GetBirthDate().AsTime()
 	avatar := req.Avatar
@@ -111,6 +120,7 @@ func (c *UserController) UpdateUser(ctx context.Context, req *pb.UpdateUserReque
 }
 
 func (c *UserController) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
+	slog.Info("UserController.DeleteUser")
 	if err := c.service.DeleteUser(ctx, req.GetUserID()); err != nil {
 		return nil, err
 	}

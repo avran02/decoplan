@@ -31,6 +31,8 @@ type postgres struct {
 }
 
 func (p *postgres) RemoveUserFromChat(ctx context.Context, ug models.UserChat) error {
+	slog.Info("repository.RemoveUserFromChat")
+	slog.Debug("args", "ug", ug)
 	query := `DELETE FROM user_chats WHERE chat_id = $1 AND user_id = $2`
 	_, err := p.db.ExecContext(ctx, query, ug.ChatID, ug.UserID)
 	if err != nil {
@@ -41,6 +43,8 @@ func (p *postgres) RemoveUserFromChat(ctx context.Context, ug models.UserChat) e
 }
 
 func (p *postgres) DeleteUser(ctx context.Context, userID string) error {
+	slog.Info("repository.DeleteUser")
+	slog.Debug("args", "userID", userID)
 	query := `DELETE FROM users WHERE id = $1`
 	_, err := p.db.ExecContext(ctx, query, userID)
 	if err != nil {
@@ -51,6 +55,8 @@ func (p *postgres) DeleteUser(ctx context.Context, userID string) error {
 }
 
 func (p *postgres) DeleteChat(ctx context.Context, chatID string) error {
+	slog.Info("repository.DeleteChat")
+	slog.Debug("args", "chatID", chatID)
 	query := `DELETE FROM chats WHERE id = $1`
 	_, err := p.db.ExecContext(ctx, query, chatID)
 	if err != nil {
@@ -61,6 +67,8 @@ func (p *postgres) DeleteChat(ctx context.Context, chatID string) error {
 }
 
 func (p *postgres) AddUserToChat(ctx context.Context, ug models.UserChat) error {
+	slog.Info("repository.AddUserToChat")
+	slog.Debug("args", "ug", ug)
 	query := `INSERT INTO user_chats (chat_id, user_id) VALUES ($1, $2)`
 	_, err := p.db.ExecContext(ctx, query, ug.ChatID, ug.UserID)
 	if err != nil {
@@ -71,6 +79,8 @@ func (p *postgres) AddUserToChat(ctx context.Context, ug models.UserChat) error 
 }
 
 func (p *postgres) CreateUser(ctx context.Context, user models.User) error {
+	slog.Info("repository.CreateUser")
+	slog.Debug("args", "user", user)
 	query := `INSERT INTO users (id, name, birth_date) VALUES ($1, $2, $3)`
 	_, err := p.db.ExecContext(ctx, query, user.ID, user.Name, user.BirthDate)
 	if err != nil {
@@ -81,6 +91,8 @@ func (p *postgres) CreateUser(ctx context.Context, user models.User) error {
 }
 
 func (p *postgres) GetUser(ctx context.Context, userID string) (models.User, error) {
+	slog.Info("repository.GetUser")
+	slog.Debug("args", "userID", userID)
 	query := `SELECT id, name, birth_date, avatar_url FROM users WHERE id = $1`
 	row := p.db.QueryRowContext(ctx, query, userID)
 
@@ -94,6 +106,8 @@ func (p *postgres) GetUser(ctx context.Context, userID string) (models.User, err
 }
 
 func (p *postgres) UpdateUser(ctx context.Context, user models.UpdateUser) error {
+	slog.Info("repository.UpdateUser")
+	slog.Debug("args", "user", user)
 	var setParts []string
 	var args []interface{}
 	var argPos int = 1
@@ -153,6 +167,8 @@ func (p *postgres) CreateChat(ctx context.Context, name, chatID string, userIDs 
 }
 
 func (p *postgres) GetChat(ctx context.Context, chatID string) (*models.Chat, error) {
+	slog.Info("repository.GetChat")
+	slog.Debug("args", "chatID", chatID)
 	query := `SELECT c.id, c.name, c.avatar_url, u.user_id FROM chats c 
               JOIN user_chats u ON c.id = u.chat_id
               WHERE c.id = $1`
