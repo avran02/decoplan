@@ -46,22 +46,10 @@ https://auth.localhost {
 }
 
 https://files.localhost {
-	header {
-		Access-Control-Allow-Origin *
-		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-		Access-Control-Allow-Headers "Authorization, Content-Type, X-CSRF-Token"
-		Access-Control-Allow-Credentials true
-	}
 	reverse_proxy files:50051
 }
 
 http://files.localhost {
-	header {
-		Access-Control-Allow-Origin *
-		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-		Access-Control-Allow-Headers "Authorization, Content-Type, X-CSRF-Token"
-		Access-Control-Allow-Credentials true
-	}
 	reverse_proxy files:50051
 }
 
