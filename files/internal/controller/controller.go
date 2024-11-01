@@ -19,6 +19,7 @@ type FilesController interface {
 	UploadFile(w http.ResponseWriter, r *http.Request)
 	DownloadFile(w http.ResponseWriter, r *http.Request)
 	DeleteFile(w http.ResponseWriter, r *http.Request)
+	IsFileExists(w http.ResponseWriter, r *http.Request)
 }
 
 type filesController struct {
@@ -109,65 +110,29 @@ func (c filesController) DeleteFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// func (c filesController) asyncSendFile(stream pb.FileService_DownloadFileServer, file io.ReadCloser, streamErrChan chan error) {
-// 	defer close(streamErrChan)
-// 	defer file.Close()
-// 	buf := make([]byte, config.StreamChunkSize)
+func (c filesController) IsFileExists(w http.ResponseWriter, r *http.Request) {
+	slog.Info("filesController.IsFileExists")
 
-// 	for {
-// 		n, err := file.Read(buf)
-// 		if err != nil {
-// 			if errors.Is(err, io.EOF) {
-// 				if n == 0 {
-// 					break
-// 				}
-// 			} else {
-// 				err = fmt.Errorf("failed to read file: %w", err)
-// 				slog.Error(err.Error())
-// 				streamErrChan <- err
-// 			}
-// 		}
+	ctx := r.Context()
+	fileID := chi.URLParam(r, "id")
 
-// 		if err = stream.Send(&pb.DownloadFileResponse{
-// 			Content: buf[:n],
-// 		}); err != nil {
-// 			streamErrChan <- fmt.Errorf("failed to send download file response: %w", err)
-// 		}
-// 	}
+	exists, err := c.Service.IsFileExists(ctx, fileID)
+	if err != nil {
+		err = fmt.Errorf("failed to check if file exists: %w", err)
+		slog.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-// 	if err := stream.Send(&pb.DownloadFileResponse{
-// 		Success: true,
-// 	}); err != nil {
-// 		streamErrChan <- fmt.Errorf("failed to send download file response: %w", err)
-// 	}
-// }
+	resp := dto.FileExistsResponse{Ok: exists}
 
-// func (c filesController) asyncGetFileFromGrpcStream(stream pb.FileService_UploadFileServer, requestDTO *dto.UploadFileStreamRequest, streamErrChan chan error) {
-// 	defer close(streamErrChan)
-// 	defer requestDTO.CloseWriter()
-
-// 	for {
-// 		req, err := stream.Recv()
-// 		if err != nil {
-// 			if errors.Is(err, io.EOF) {
-// 				break
-// 			}
-
-// 			err = fmt.Errorf("failed to receive upload file request: %w", err)
-// 			slog.Error(err.Error())
-// 			streamErrChan <- err
-// 			return
-// 		}
-
-// 		_, err = requestDTO.Write(req.Content)
-// 		if err != nil {
-// 			err = fmt.Errorf("failed to write upload file request: %w", err)
-// 			slog.Error(err.Error())
-// 			streamErrChan <- err
-// 			return
-// 		}
-// 	}
-// }
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		slog.Error(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
 
 func New(service service.FilesService) FilesController {
 	slog.Info("initializing controller")

@@ -18,8 +18,9 @@ func (r Router) getFilesRoutes() *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Post("/upload", r.controller.UploadFile)
-	router.Post("/download/{id}", r.controller.DownloadFile)
+	router.Get("/download/{id}", r.controller.DownloadFile)
 	router.Delete("/delete/{id}", r.controller.DeleteFile)
+	router.Get("/exists/{id}", r.controller.IsFileExists)
 
 	return router
 }

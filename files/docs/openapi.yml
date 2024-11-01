@@ -27,7 +27,7 @@ paths:
                   id:
                     type: string
   /download/{id}:
-    post:
+    get:
       summary: Download a files
       parameters:
         - name: id
@@ -52,6 +52,26 @@ paths:
           in: path
           required: true
           description: ID of the file to be removed
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+  /exists/{id}:
+    get:
+      summary: Check if a file exists
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the file to be checked
           schema:
             type: string
       responses:

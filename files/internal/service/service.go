@@ -28,6 +28,7 @@ type FilesService interface {
 	UploadFile(ctx context.Context, data io.Reader, fileName string) (string, error)
 	DownloadFile(ctx context.Context, fileID string) (io.ReadCloser, error)
 	DeleteFile(ctx context.Context, fileID string) error
+	IsFileExists(ctx context.Context, fileID string) (bool, error)
 }
 
 type filesService struct {
@@ -76,6 +77,23 @@ func (s *filesService) DeleteFile(ctx context.Context, fileID string) error {
 
 	slog.Debug("deleting file", "fileID", fileID, "bucket", config.UserDataBucket)
 	return s.minio.RemoveObject(ctx, config.UserDataBucket, fileID, minio.RemoveObjectOptions{})
+}
+
+func (s *filesService) IsFileExists(ctx context.Context, fileID string) (bool, error) {
+	slog.Info("filesService.IsFileExists")
+	if err := s.createBucketIfNotExists(ctx); err != nil {
+		return false, fmt.Errorf("failed to create bucket: %w", err)
+	}
+
+	if _, err := s.minio.StatObject(ctx, config.UserDataBucket, fileID, minio.StatObjectOptions{}); err != nil {
+		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
+			return false, nil
+		}
+		slog.Error(err.Error())
+		return false, fmt.Errorf("failed to stat object: %w", err)
+	}
+
+	return true, nil
 }
 
 func (s *filesService) createBucketIfNotExists(ctx context.Context) error {
