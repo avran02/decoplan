@@ -34,7 +34,7 @@ instance.interceptors.request.use(config => {
 // 		) {
 // 			originalRequest._isRetry = true
 // 			try {
-// 				await authService.getNewTokens(Cookies.get(EnumTokens.REFRESH_TOKEN) as string)
+// 				await authService.getNewTokens()
 // 				return instance.request(originalRequest)
 // 			} catch (error) {
 // 				if (
