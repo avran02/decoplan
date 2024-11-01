@@ -5,7 +5,7 @@ info:
   description: API для управления пользователями и чатами
 
 servers:
-  - url: https://localhost/api/v1
+  - url: http://localhost/api/v1
     description: Локальный сервер для разработки
 
 paths:

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/avran02/decoplan/chat/internal/mapper"
 	"github.com/avran02/decoplan/chat/internal/models"
@@ -26,6 +27,8 @@ type service struct {
 }
 
 func (s *service) SaveMessage(ctx context.Context, message *storagepb.Message) error {
+	slog.Info("service.SaveMessage")
+	slog.Debug("args", "message", message)
 	resp, err := s.storageClient.SaveMessage(ctx, &storagepb.SaveMessageRequest{Message: message})
 	if err != nil {
 		return fmt.Errorf("failed to save message: %w", err)
@@ -38,6 +41,8 @@ func (s *service) SaveMessage(ctx context.Context, message *storagepb.Message) e
 }
 
 func (s *service) DeleteMessage(ctx context.Context, chatID string, messageID uint64) error {
+	slog.Info("service.DeleteMessage")
+	slog.Debug("args", "chatID", chatID, "messageID", messageID)
 	resp, err := s.storageClient.DeleteMessage(ctx, &storagepb.DeleteMessageRequest{
 		ChatId:    chatID,
 		MessageId: messageID},
@@ -53,6 +58,8 @@ func (s *service) DeleteMessage(ctx context.Context, chatID string, messageID ui
 }
 
 func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset uint64) ([]models.Message, error) {
+	slog.Info("service.GetMessages")
+	slog.Debug("args", "chatID", chatID, "limit", limit, "offset", offset)
 	resp, err := s.storageClient.GetMessages(ctx, &storagepb.GetMessagesRequest{
 		ChatId: chatID,
 		Limit:  limit,
@@ -69,6 +76,8 @@ func (s *service) GetMessages(ctx context.Context, chatID string, limit, offset 
 }
 
 func (s *service) GetChatMembers(ctx context.Context, chatID, userID string) ([]string, error) {
+	slog.Info("service.GetChatMembers")
+	slog.Debug("args", "chatID", chatID, "userID", userID)
 	resp, err := s.usersClient.GetChat(ctx, &userspb.GetChatRequest{Id: chatID})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get chat members: %w", err)
@@ -88,6 +97,8 @@ func (s *service) GetChatMembers(ctx context.Context, chatID, userID string) ([]
 }
 
 func (s *service) ValidateToken(ctx context.Context, token string) (string, error) {
+	slog.Info("service.ValidateToken")
+	slog.Debug("args", "token", token)
 	resp, err := s.authClient.ValidateToken(ctx, &authpb.ValidateTokenRequest{AccessToken: token})
 	if err != nil {
 		return "", fmt.Errorf("failed to validate token: %w", err)
