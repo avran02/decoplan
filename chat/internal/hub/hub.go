@@ -93,6 +93,8 @@ func (hub *websocketHub) SendMessage(remoteAddr string, message []byte) error {
 
 // server sends message to all clients
 func (hub *websocketHub) broadcastMessage(message []byte, chatID, userID string) {
+	slog.Info("hub.broadcastMessage")
+	slog.Debug("args", "message", string(message), "chatID", chatID, "userID", userID)
 	clientIds, err := hub.service.GetChatMembers(context.Background(), chatID, userID)
 	if err != nil {
 		slog.Error("failed to get chat members", "error", err.Error())
@@ -203,7 +205,11 @@ func (hub *websocketHub) userAsksMessagesController(conn *websocket.Conn, payloa
 	}
 
 	addr := conn.RemoteAddr().String()
-	hub.broadcastMessage(rawResp, req.ChatID, hub.clients[addr].UserID)
+	if err := hub.SendMessage(addr, rawResp); err != nil {
+		slog.Error("failed to send message", "error", err)
+
+		return
+	}
 }
 
 func New(service service.Service) WebsocketHub {
