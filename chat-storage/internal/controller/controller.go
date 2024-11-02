@@ -25,14 +25,19 @@ type controller struct {
 }
 
 func (c *controller) SaveMessage(ctx context.Context, req *pb.SaveMessageRequest) (*pb.SaveMessageResponse, error) {
-	if err := c.service.SaveMessage(ctx, mapper.FromSaveMessageDtoToModel(req)); err != nil {
+	id, err := c.service.GetNextMessageID(ctx, req.Message.ChatId)
+	if err != nil {
+		slog.Error("failed to get next message ID", "error", err.Error())
+		return nil, err
+	}
+
+	model := mapper.FromSaveMessageDtoToModel(req, id)
+	if err := c.service.SaveMessage(ctx, model); err != nil {
 		slog.Error("failed to save message", "error", err.Error())
 		return nil, err
 	}
 
-	return &pb.SaveMessageResponse{
-		Ok: true,
-	}, nil
+	return mapper.FromModelToSaveMessageResponse(model), nil
 }
 
 func (c *controller) GetMessages(ctx context.Context, req *pb.GetMessagesRequest) (*pb.GetMessagesResponse, error) {

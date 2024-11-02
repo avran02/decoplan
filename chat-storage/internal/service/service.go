@@ -10,6 +10,7 @@ import (
 )
 
 type Service interface {
+	GetNextMessageID(ctx context.Context, chatID string) (uint64, error)
 	SaveMessage(ctx context.Context, message models.Message) error
 	GetMessages(ctx context.Context, chatID string, limit, offset uint64) ([]models.Message, error)
 	DeleteMessage(ctx context.Context, chatID string, messageID uint64) error
@@ -22,13 +23,16 @@ type service struct {
 	mongo repository.MongoRepository
 }
 
+func (s *service) GetNextMessageID(ctx context.Context, chatID string) (uint64, error) {
+	id, err := s.mongo.GetNextMessageID(ctx, chatID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get next message ID: %w", err)
+	}
+	return id, nil
+}
+
 func (s *service) SaveMessage(ctx context.Context, message models.Message) error {
 	slog.Debug("service.SaveMessage", "message", message)
-	id, err := s.mongo.GetNextMessageID(ctx, message.ChatID)
-	if err != nil {
-		return fmt.Errorf("failed to get next message ID: %w", err)
-	}
-	message.ID = id
 	s.mongo.SaveMessage(ctx, message)
 	return s.redis.SaveMessage(ctx, message)
 }
