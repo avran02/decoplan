@@ -1,9 +1,12 @@
 package enum
 
-type UserMessages uint
+type MessageTypes uint
 
 const (
-	UserGetMessages UserMessages = iota
+	UserGetMessages MessageTypes = iota
 	UserSendMessage
 	UserDeleteMessage
+
+	ServerSendMessage
+	ServerDeleteMessage
 )

@@ -10,12 +10,12 @@ servers:
 
 components:
   schemas:
-    AttachmentsReq:
+    Attachments:
       type: array
       items:
         type: object
         properties:
-          id: 
+          id:
             type: string
             example: "1"
             description: ID вложения
@@ -25,12 +25,15 @@ components:
             example: "https://files.host/uuid.jpg"
             description: URL вложения
 
-    Message:
+    FromServerMessage:
       type: object
       properties:
         id:
+          type: integer
+          example: 1
+        chatId:
           type: string
-          example: "1"
+          example: "chat-uuid"
         sender:
           type: string
           example: "user123"
@@ -42,12 +45,13 @@ components:
               example: "Hello, world!"
               description: Текст вложения
             attachments:
-              $ref: '#/components/schemas/AttachmentsReq'
+              $ref: "#/components/schemas/Attachments"
               description: Список вложений
-        timestamp:
+        CreatedAt:
           type: string
           format: date-time
           example: "2023-10-02T10:00:00Z"
+
     AskMessagesDto:
       type: object
       properties:
@@ -55,13 +59,14 @@ components:
           type: string
           example: "chat-uuid"
         limit:
-          type: number
+          type: integer
           example: 10
           description: Количество сообщений
         offset:
-          type: number
+          type: integer
           example: 0
           description: Смещение
+
     DeleteMessageDto:
       type: object
       properties:
@@ -69,16 +74,14 @@ components:
           type: string
           example: "chat-uuid"
         messageId:
-          type: number
+          type: integer
           example: 1
           description: ID сообщения
+
     NewMessageDto:
       type: object
+      description: Новое сообщение от пользователя на сервер
       properties:
-        timestamp:
-          type: string
-          format: date-time
-          example: "2023-10-02T10:00:00Z"
         chatId:
           type: string
           example: "chat-uuid"
@@ -90,9 +93,8 @@ components:
               example: "Hello, world!"
               description: Текст вложения
             attachments:
-              $ref: '#/components/schemas/AttachmentsReq'
+              $ref: "#/components/schemas/Attachments"
               description: Список вложений
-    
 
 paths:
   /connect:
@@ -103,7 +105,7 @@ paths:
         - bearerAuth: []
       summary: Установить соединение WebSocket
       responses:
-        '101':
+        "101":
           description: Соединение установлено
   /disconnect:
     post:
@@ -113,24 +115,36 @@ paths:
         - bearerAuth: []
       summary: Закрыть соединение WebSocket
       responses:
-        '101':
-          description: Соединение закрыто 
-  
+        "101":
+          description: Соединение закрыто
+
   /new-message:
     get:
       tags:
         - FromServerEvent
       summary: Сервер отправляет новое сообщение на клиент
       responses:
-        '200':
-          description: Подписка успешна
+        "200":
+          description: ok
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Message'
-                  
+                  $ref: "#/components/schemas/FromServerMessage"
+  /delete-message:
+    get:
+      tags:
+        - FromServerEvent
+      summary: Сервер уведомляет об удалении сообщения
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteMessageDto"
+
   /messages:
     put:
       tags:
@@ -140,18 +154,17 @@ paths:
         required: true
         content:
           application/json:
-            schema: 
-              $ref: '#/components/schemas/AskMessagesDto'
-              
+            schema:
+              $ref: "#/components/schemas/AskMessagesDto"
       responses:
-        '200':
+        "200":
           description: Список сообщений получен
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Message'
+                  $ref: "#/components/schemas/FromServerMessage"
 
     post:
       tags:
@@ -162,14 +175,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewMessageDto'
+              $ref: "#/components/schemas/NewMessageDto"
       responses:
-        '201':
+        "200":
           description: Сообщение успешно отправлено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Message'
+                $ref: "#/components/schemas/FromServerMessage"
 
   /messages/{id}:
     delete:
@@ -181,11 +194,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteMessageDto'
+              $ref: "#/components/schemas/DeleteMessageDto"
       responses:
-        '204':
+        "200":
           description: Сообщение успешно удалено
-        '404':
-          description: Сообщение не найдено
-
-

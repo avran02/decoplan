@@ -3,7 +3,6 @@ package hub
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"sync"
@@ -35,8 +34,8 @@ type WebsocketHub interface {
 }
 
 type websocketHub struct {
-	clients   map[string]models.WebsocketClient // map[remoteAddr]models.WebsocketClient
-	clientIPs map[string]string                 // map[userID]remoteAddr
+	clientConnections map[string]models.WebsocketClient // map[remoteAddr]models.WebsocketClient
+	clientIPs         map[string]string                 // map[userID]remoteAddr
 
 	service service.Service
 	mu      sync.RWMutex
@@ -60,7 +59,7 @@ func (hub *websocketHub) RegisterWebsocket(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	hub.clients[r.RemoteAddr] = models.WebsocketClient{
+	hub.clientConnections[r.RemoteAddr] = models.WebsocketClient{
 		Conn:   conn,
 		UserID: id,
 	}
@@ -72,29 +71,28 @@ func (hub *websocketHub) RegisterWebsocket(w http.ResponseWriter, r *http.Reques
 func (hub *websocketHub) CloseWebsocket(w http.ResponseWriter, r *http.Request) {
 	hub.mu.Lock()
 	defer hub.mu.Unlock()
-	delete(hub.clients, r.RemoteAddr)
-	hub.clients[r.RemoteAddr].Conn.Close()
+	delete(hub.clientConnections, r.RemoteAddr)
+	hub.clientConnections[r.RemoteAddr].Conn.Close()
 }
 
 // server sends message to specific client
-func (hub *websocketHub) SendMessage(remoteAddr string, message []byte) error {
+func (hub *websocketHub) sendMessage(remoteAddr string, message []byte) {
 	hub.mu.RLock()
 	defer hub.mu.RUnlock()
-	client, ok := hub.clients[remoteAddr]
+	client, ok := hub.clientConnections[remoteAddr]
 	if !ok {
-		return ErrClientNotFound
+		slog.Error("client not found", "remoteAddr", remoteAddr)
+		return
 	}
 
 	if err := client.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
-		return fmt.Errorf("failed to send message: %w", err)
+		slog.Error("failed to send message", "error", err.Error())
 	}
-	return nil
 }
 
-// server sends message to all clients
-func (hub *websocketHub) broadcastMessage(message []byte, chatID, userID string) {
+// server sends message to clients
+func (hub *websocketHub) broadcastMessage(message []byte, chatID, userID string, skipIssuer bool) {
 	slog.Info("hub.broadcastMessage")
-	slog.Debug("args", "message", string(message), "chatID", chatID, "userID", userID)
 	clientIds, err := hub.service.GetChatMembers(context.Background(), chatID, userID)
 	if err != nil {
 		slog.Error("failed to get chat members", "error", err.Error())
@@ -102,17 +100,14 @@ func (hub *websocketHub) broadcastMessage(message []byte, chatID, userID string)
 	}
 
 	for _, id := range clientIds {
-		if id == userID {
+		if id == userID && skipIssuer {
 			continue
 		}
 		clientIP, exists := hub.clientIPs[id]
 		if !exists {
 			continue
 		}
-		if err := hub.SendMessage(clientIP, message); err != nil {
-			slog.Error("failed to send message to client", "error", err.Error(), "client", id)
-			slog.Debug("hub", "clients", hub.clients, "clientIPs", hub.clientIPs)
-		}
+		hub.sendMessage(clientIP, message)
 	}
 }
 
@@ -126,7 +121,7 @@ func (hub *websocketHub) handleClientMessage(conn *websocket.Conn) {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-		var userMsg dto.UserRequestDto
+		var userMsg dto.WSMessageDto
 		if err := json.Unmarshal(message, &userMsg); err != nil {
 			slog.Error("failed to unmarshal message", "error", err)
 			continue
@@ -145,26 +140,30 @@ func (hub *websocketHub) handleClientMessage(conn *websocket.Conn) {
 
 // controllers
 func (hub *websocketHub) userSendMessageController(conn *websocket.Conn, payload []byte) {
-	slog.Debug("userSendMessageController", "payload", string(payload))
-	var req dto.NewMessageDto
+	slog.Info("userSendMessageController")
+	var req dto.FromClientMessageDto
 	if err := json.Unmarshal(payload, &req); err != nil {
 		slog.Error("failed to unmarshal message", "error", err)
 		return
 	}
-	msgpb := mapper.SaveMessageHttpRequestToPb(req, hub.clients[conn.RemoteAddr().String()].UserID)
-	if err := hub.service.SaveMessage(context.Background(), msgpb); err != nil {
+
+	// can be optimized by unmarshalling payload to pb
+	msgpb := mapper.SaveMessageHttpRequestToPb(req, hub.clientConnections[conn.RemoteAddr().String()].UserID)
+	msg, err := hub.service.SaveMessage(context.Background(), msgpb)
+	if err != nil {
 		slog.Error("failed to save message", "error", err)
 		return
 	}
-	resp := mapper.PbMsgToModel(msgpb)
-	rawResp, err := json.Marshal(resp)
+
+	// add action to response
+	resp, err := mapper.MessageToResponse(msg, enum.ServerSendMessage)
 	if err != nil {
 		slog.Error("failed to marshal message", "error", err)
 		return
 	}
 
 	addr := conn.RemoteAddr().String()
-	hub.broadcastMessage(rawResp, req.ChatID, hub.clients[addr].UserID)
+	hub.broadcastMessage(resp, req.ChatID, hub.clientConnections[addr].UserID, true)
 }
 
 func (hub *websocketHub) userDeleteMessageController(conn *websocket.Conn, payload []byte) {
@@ -181,12 +180,12 @@ func (hub *websocketHub) userDeleteMessageController(conn *websocket.Conn, paylo
 	}
 
 	addr := conn.RemoteAddr().String()
-	hub.broadcastMessage(payload, req.ChatID, hub.clients[addr].UserID)
+	hub.broadcastMessage(payload, req.ChatID, hub.clientConnections[addr].UserID, false)
 }
 
 func (hub *websocketHub) userAsksMessagesController(conn *websocket.Conn, payload []byte) {
 	slog.Debug("userAsksMessagesController", "payload", string(payload))
-	var req dto.AskMessagesDto
+	var req dto.UserAskMessagesDto
 	if err := json.Unmarshal(payload, &req); err != nil {
 		slog.Error("failed to unmarshal message", "error", err)
 		return
@@ -198,25 +197,21 @@ func (hub *websocketHub) userAsksMessagesController(conn *websocket.Conn, payloa
 		return
 	}
 
-	rawResp, err := json.Marshal(messages)
+	resp, err := mapper.MessagesToResponse(messages, enum.ServerSendMessage)
 	if err != nil {
-		slog.Error("failed to marshal messages", "error", err)
+		slog.Error("failed to marshal message", "error", err)
 		return
 	}
 
 	addr := conn.RemoteAddr().String()
-	if err := hub.SendMessage(addr, rawResp); err != nil {
-		slog.Error("failed to send message", "error", err)
-
-		return
-	}
+	hub.sendMessage(addr, resp)
 }
 
 func New(service service.Service) WebsocketHub {
 	return &websocketHub{
-		clients:   make(map[string]models.WebsocketClient),
-		clientIPs: make(map[string]string),
-		service:   service,
-		mu:        sync.RWMutex{},
+		clientConnections: make(map[string]models.WebsocketClient),
+		clientIPs:         make(map[string]string),
+		service:           service,
+		mu:                sync.RWMutex{},
 	}
 }
