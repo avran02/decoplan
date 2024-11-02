@@ -24,7 +24,7 @@ paths:
                   type: string
                   format: binary
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
@@ -46,7 +46,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/octet-stream:
@@ -66,7 +66,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
@@ -88,7 +88,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:

@@ -39,8 +39,8 @@ paths:
                 - username
                 - password
       responses:
-        '201':
-          description: Успешная регистрация пользователя            
+        "201":
+          description: Успешная регистрация пользователя
           content:
             application/json:
               schema:
@@ -56,7 +56,7 @@ paths:
                     type: string
                     example: "refresh_token_in_cookie"
                     description: set to cookie
-        '400':
+        "400":
           description: Ошибка валидации данных
           content:
             application/json:
@@ -92,7 +92,7 @@ paths:
                 - username
                 - password
       responses:
-        '200':
+        "200":
           description: Успешная аутентификация
           content:
             application/json:
@@ -109,7 +109,7 @@ paths:
                     type: string
                     description: set to cookie
                     example: "refresh_token_in_cookie"
-        '401':
+        "401":
           description: Неверные учетные данные
           content:
             application/json:
@@ -140,7 +140,7 @@ paths:
               required:
                 - refreshToken
       responses:
-        '200':
+        "200":
           description: Успешное обновление токенов
           content:
             application/json:
@@ -154,7 +154,7 @@ paths:
                     type: string
                     description: set to cookie
                     example: "new_refresh_token_in_cookie"
-        '401':
+        "401":
           description: Неверный или просроченный refreshToken
           content:
             application/json:
@@ -185,7 +185,7 @@ paths:
               required:
                 - accessToken
       responses:
-        '200':
+        "200":
           description: Успешный выход
           content:
             application/json:
@@ -195,7 +195,7 @@ paths:
                   ok:
                     type: boolean
                     example: true
-        '401':
+        "401":
           description: Неавторизованный
           content:
             application/json:
