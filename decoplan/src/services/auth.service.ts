@@ -38,10 +38,20 @@ class AuthService {
 	}
 
 
+<<<<<<< HEAD
+	async getNewTokens() {
+		const response = await axiosClassic.post<IAuthResponse>(
+			'/refresh-tokens',
+			{},
+			{
+				withCredentials: true,
+			}
+=======
 	async getNewTokens(refreshToken: string) {
 		const response = await axiosClassic.post<IAuthResponse>(
 			'/refresh-token',
 			refreshToken
+>>>>>>> dev
 		)
 		return response.data
 	}
