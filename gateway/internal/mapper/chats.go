@@ -1,8 +1,8 @@
 package mapper
 
 import (
-	"github.com/avran02/decplan/gateway/internal/dto"
-	"github.com/avran02/decplan/gateway/pb"
+	"github.com/avran02/decoplan/gateway/internal/dto"
+	"github.com/avran02/decoplan/gateway/pb"
 )
 
 func ChatInfoFromPbToHttp(in *pb.GetChatResponse) dto.GetChatResponse {

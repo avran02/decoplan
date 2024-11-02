@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/avran02/decplan/gateway/internal/services"
+	"github.com/avran02/decoplan/gateway/internal/services"
 	jsoniter "github.com/json-iterator/go"
 )
 

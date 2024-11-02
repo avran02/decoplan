@@ -1,4 +1,4 @@
-module github.com/avran02/decplan/gateway
+module github.com/avran02/decoplan/gateway
 
 go 1.23.1
 

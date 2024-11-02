@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/avran02/decplan/gateway/internal/dto"
-	"github.com/avran02/decplan/gateway/internal/enum"
-	"github.com/avran02/decplan/gateway/internal/services"
+	"github.com/avran02/decoplan/gateway/internal/dto"
+	"github.com/avran02/decoplan/gateway/internal/enum"
+	"github.com/avran02/decoplan/gateway/internal/services"
 	"github.com/go-chi/chi/v5"
 )
 
