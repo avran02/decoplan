@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/avran02/decplan/gateway/internal/config"
+	"github.com/avran02/decoplan/gateway/internal/config"
 )
 
 func Setup(conf config.Server) {

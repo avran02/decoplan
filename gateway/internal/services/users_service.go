@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/avran02/decplan/gateway/pb"
+	"github.com/avran02/decoplan/gateway/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
