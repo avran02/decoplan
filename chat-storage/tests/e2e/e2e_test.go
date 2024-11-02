@@ -23,7 +23,7 @@ type TestSuite struct {
 
 func setup() (*TestSuite, func()) {
 	// Set up a connection to the gRPC server
-	conn, err := grpc.NewClient("localhost:51051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -47,8 +47,7 @@ func TestChatStorageService(t *testing.T) {
 	assert.True(t, createChatResp.Ok)
 
 	// Test SaveMessage
-	message := &pb.Message{
-		Id:        1,
+	message := &pb.MessageReq{
 		ChatId:    chatID,
 		Sender:    "user1",
 		Content:   "Hello, World!",
@@ -56,7 +55,10 @@ func TestChatStorageService(t *testing.T) {
 	}
 	saveMessageResp, err := ts.client.SaveMessage(context.Background(), &pb.SaveMessageRequest{Message: message})
 	assert.NoError(t, err)
-	assert.True(t, saveMessageResp.Ok)
+	assert.Equal(t, uint64(1), saveMessageResp.Message.Id)
+	assert.Equal(t, message.Content, saveMessageResp.Message.Content)
+	assert.Equal(t, message.Sender, saveMessageResp.Message.Sender)
+	assert.Equal(t, message.CreatedAt.AsTime(), saveMessageResp.Message.CreatedAt.AsTime())
 
 	// Test GetMessages
 	getMessagesResp, err := ts.client.GetMessages(context.Background(), &pb.GetMessagesRequest{ChatId: chatID, Limit: 10, Offset: 0})

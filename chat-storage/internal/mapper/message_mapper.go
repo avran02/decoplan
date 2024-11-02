@@ -6,13 +6,13 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func MessageModelToPB(model models.Message) *pb.Message {
+func MessageModelToPB(model models.Message, id uint64) *pb.Message {
 	attachments := make([]*pb.Attachment, 0, len(model.Attachments))
 	for _, a := range model.Attachments {
 		attachments = append(attachments, AttachmentModelToPB(a))
 	}
 	resp := &pb.Message{
-		Id:          &model.ID,
+		Id:          id,
 		ChatId:      model.ChatID,
 		Sender:      model.Sender,
 		Content:     model.Content,
