@@ -6,12 +6,12 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/avran02/decplan/gateway/internal/config"
-	"github.com/avran02/decplan/gateway/internal/controllers"
-	"github.com/avran02/decplan/gateway/internal/router"
-	"github.com/avran02/decplan/gateway/internal/services"
-	"github.com/avran02/decplan/gateway/logger"
-	"github.com/avran02/decplan/gateway/pb"
+	"github.com/avran02/decoplan/gateway/internal/config"
+	"github.com/avran02/decoplan/gateway/internal/controllers"
+	"github.com/avran02/decoplan/gateway/internal/router"
+	"github.com/avran02/decoplan/gateway/internal/services"
+	"github.com/avran02/decoplan/gateway/logger"
+	"github.com/avran02/decoplan/gateway/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -37,7 +37,7 @@ func New() *App {
 	logger.Setup(conf.Server)
 	srv := services.NewUsersService(connectUsersService(conf.ExternalServices.UsersServiceUrl))
 	controller := controllers.New(srv)
-	router := router.New(controller)
+	router := router.New(controller, connectAuthService(conf.ExternalServices.AuthServiceUrl))
 
 	return &App{
 		config: conf,
@@ -48,7 +48,7 @@ func New() *App {
 func connectUsersService(endpoint string) pb.UsersServiceClient {
 	conn, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to connect to auth service: %s", err)
+		log.Fatalf("failed to connect to users service: %s", err)
 	}
 
 	return pb.NewUsersServiceClient(conn)

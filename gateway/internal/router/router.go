@@ -6,8 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/avran02/decplan/gateway/internal/controllers"
+	"github.com/avran02/decoplan/gateway/internal/controllers"
+	authMiddleware "github.com/avran02/decoplan/gateway/internal/middleware"
+	"github.com/avran02/decoplan/gateway/pb"
 	"github.com/go-chi/chi/v5"
+
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 )
@@ -16,10 +19,13 @@ type Router struct {
 	chi.Router
 	uc controllers.UsersController
 	cc controllers.ChatsController
+	m  authMiddleware.AuthMiddleware
 }
 
 func (router *Router) getUsersRoutes() *chi.Mux {
 	r := chi.NewRouter()
+	r.Use(router.m.Middleware)
+
 	r.Route("/users", func(r chi.Router) {
 		r.Post("/", router.uc.CreateUserHandler)
 		r.Get("/{id}", router.uc.GetUserHandler)
@@ -41,11 +47,13 @@ func (router *Router) getUsersRoutes() *chi.Mux {
 	return r
 }
 
-func New(controller *controllers.Controller) Router {
+func New(controller *controllers.Controller, authClient pb.AuthServiceClient) Router {
 	r := Router{
 		cc: controller.ChatsController(),
 		uc: controller.UsersController(),
+		m:  *authMiddleware.NewAuthMiddleware(authClient),
 	}
+
 	main := chi.NewRouter()
 	main.Use(middleware.Logger)
 	main.Use(cors.Handler(allowAllCORS()))
