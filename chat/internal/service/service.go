@@ -13,7 +13,7 @@ import (
 )
 
 type Service interface {
-	SaveMessage(ctx context.Context, message *storagepb.Message) error
+	SaveMessage(ctx context.Context, message *storagepb.MessageReq) (*models.Message, error)
 	DeleteMessage(ctx context.Context, chatID string, messageID uint64) error
 	GetMessages(ctx context.Context, chatID string, limit, offset uint64) ([]models.Message, error)
 	GetChatMembers(ctx context.Context, chatID, userID string) ([]string, error)
@@ -26,18 +26,35 @@ type service struct {
 	authClient    authpb.AuthServiceClient
 }
 
-func (s *service) SaveMessage(ctx context.Context, message *storagepb.Message) error {
+func (s *service) SaveMessage(ctx context.Context, message *storagepb.MessageReq) (*models.Message, error) {
 	slog.Info("service.SaveMessage")
 	slog.Debug("args", "message", message)
 	resp, err := s.storageClient.SaveMessage(ctx, &storagepb.SaveMessageRequest{Message: message})
 	if err != nil {
-		return fmt.Errorf("failed to save message: %w", err)
-	}
-	if resp.GetOk() == false {
-		return ErrUnknownError
+		return nil, fmt.Errorf("failed to save message: %w", err)
 	}
 
-	return nil
+	attachments := make([]models.Attachment, 0, len(resp.Message.Attachments))
+	for _, a := range resp.Message.Attachments {
+		attachments = append(attachments, models.Attachment{
+			MessageID: a.GetMessageId(),
+			ID:        a.GetId(),
+			URL:       a.GetUrl(),
+			ChatID:    a.GetChatId(),
+		})
+	}
+
+	return &models.Message{
+		ID:     resp.Message.GetId(),
+		ChatID: resp.Message.GetChatId(),
+		Sender: resp.Message.GetSender(),
+		Content: models.Content{
+			Attachments: attachments,
+			Text:        resp.Message.GetContent(),
+		},
+		CreatedAt: resp.Message.CreatedAt.AsTime(),
+		DeletedAt: nil,
+	}, nil
 }
 
 func (s *service) DeleteMessage(ctx context.Context, chatID string, messageID uint64) error {
