@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package auth;
+option go_package = "github.com/avran02/pb";
+
+service AuthService {
+    rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
+message ValidateTokenRequest {
+    string accessToken = 1;
+}
+
+message ValidateTokenResponse {
+    string id = 1;
+}

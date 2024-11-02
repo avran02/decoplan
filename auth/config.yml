@@ -1,0 +1,16 @@
+cors:
+  allowed_origins:
+    - "http://localhost:3000"
+  allowed_methods:
+    - "GET"
+    - "POST"
+    - "OPTIONS"
+  allowed_headers:
+    - "*"
+  allow_credentials: true
+cookie:
+  domain: auth.localhost
+  http_only: true
+  secure: true
+  same_site: "none"
+  partitioned: true

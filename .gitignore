@@ -44,4 +44,7 @@ _testmain.go
 /test/run.out
 /test/times.out
 
+.env
 */.env
+local-dev/
+decoplan/bun.lockb

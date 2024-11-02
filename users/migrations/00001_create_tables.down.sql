@@ -1,3 +1,3 @@
-DROP TABLE IF EXISTS "user_group";
-DROP TABLE IF EXISTS "group";
+DROP TABLE IF EXISTS "user_chat";
+DROP TABLE IF EXISTS "chat";
 DROP TABLE IF EXISTS "user";

@@ -19,15 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UsersService_CreateUser_FullMethodName          = "/users.UsersService/CreateUser"
-	UsersService_GetUser_FullMethodName             = "/users.UsersService/GetUser"
-	UsersService_UpdateUser_FullMethodName          = "/users.UsersService/UpdateUser"
-	UsersService_DeleteUser_FullMethodName          = "/users.UsersService/DeleteUser"
-	UsersService_CreateGroup_FullMethodName         = "/users.UsersService/CreateGroup"
-	UsersService_GetGroup_FullMethodName            = "/users.UsersService/GetGroup"
-	UsersService_AddUserToGroup_FullMethodName      = "/users.UsersService/AddUserToGroup"
-	UsersService_RemoveUserFromGroup_FullMethodName = "/users.UsersService/RemoveUserFromGroup"
-	UsersService_DeleteGroup_FullMethodName         = "/users.UsersService/DeleteGroup"
+	UsersService_CreateUser_FullMethodName         = "/users.UsersService/CreateUser"
+	UsersService_GetUser_FullMethodName            = "/users.UsersService/GetUser"
+	UsersService_UpdateUser_FullMethodName         = "/users.UsersService/UpdateUser"
+	UsersService_DeleteUser_FullMethodName         = "/users.UsersService/DeleteUser"
+	UsersService_CreateChat_FullMethodName         = "/users.UsersService/CreateChat"
+	UsersService_GetChat_FullMethodName            = "/users.UsersService/GetChat"
+	UsersService_AddUserToChat_FullMethodName      = "/users.UsersService/AddUserToChat"
+	UsersService_RemoveUserFromChat_FullMethodName = "/users.UsersService/RemoveUserFromChat"
+	UsersService_DeleteChat_FullMethodName         = "/users.UsersService/DeleteChat"
 )
 
 // UsersServiceClient is the client API for UsersService service.
@@ -38,11 +38,11 @@ type UsersServiceClient interface {
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
-	CreateGroup(ctx context.Context, in *CreateGroupRequest, opts ...grpc.CallOption) (*CreateGroupResponse, error)
-	GetGroup(ctx context.Context, in *GetGroupRequest, opts ...grpc.CallOption) (*GetGroupResponse, error)
-	AddUserToGroup(ctx context.Context, in *AddUserToGroupRequest, opts ...grpc.CallOption) (*AddUserToGroupResponse, error)
-	RemoveUserFromGroup(ctx context.Context, in *RemoveUserFromGroupRequest, opts ...grpc.CallOption) (*RemoveUserFromGroupResponse, error)
-	DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*DeleteGroupResponse, error)
+	CreateChat(ctx context.Context, in *CreateChatRequest, opts ...grpc.CallOption) (*CreateChatResponse, error)
+	GetChat(ctx context.Context, in *GetChatRequest, opts ...grpc.CallOption) (*GetChatResponse, error)
+	AddUserToChat(ctx context.Context, in *AddUserToChatRequest, opts ...grpc.CallOption) (*AddUserToChatResponse, error)
+	RemoveUserFromChat(ctx context.Context, in *RemoveUserFromChatRequest, opts ...grpc.CallOption) (*RemoveUserFromChatResponse, error)
+	DeleteChat(ctx context.Context, in *DeleteChatRequest, opts ...grpc.CallOption) (*DeleteChatResponse, error)
 }
 
 type usersServiceClient struct {
@@ -89,45 +89,45 @@ func (c *usersServiceClient) DeleteUser(ctx context.Context, in *DeleteUserReque
 	return out, nil
 }
 
-func (c *usersServiceClient) CreateGroup(ctx context.Context, in *CreateGroupRequest, opts ...grpc.CallOption) (*CreateGroupResponse, error) {
-	out := new(CreateGroupResponse)
-	err := c.cc.Invoke(ctx, UsersService_CreateGroup_FullMethodName, in, out, opts...)
+func (c *usersServiceClient) CreateChat(ctx context.Context, in *CreateChatRequest, opts ...grpc.CallOption) (*CreateChatResponse, error) {
+	out := new(CreateChatResponse)
+	err := c.cc.Invoke(ctx, UsersService_CreateChat_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *usersServiceClient) GetGroup(ctx context.Context, in *GetGroupRequest, opts ...grpc.CallOption) (*GetGroupResponse, error) {
-	out := new(GetGroupResponse)
-	err := c.cc.Invoke(ctx, UsersService_GetGroup_FullMethodName, in, out, opts...)
+func (c *usersServiceClient) GetChat(ctx context.Context, in *GetChatRequest, opts ...grpc.CallOption) (*GetChatResponse, error) {
+	out := new(GetChatResponse)
+	err := c.cc.Invoke(ctx, UsersService_GetChat_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *usersServiceClient) AddUserToGroup(ctx context.Context, in *AddUserToGroupRequest, opts ...grpc.CallOption) (*AddUserToGroupResponse, error) {
-	out := new(AddUserToGroupResponse)
-	err := c.cc.Invoke(ctx, UsersService_AddUserToGroup_FullMethodName, in, out, opts...)
+func (c *usersServiceClient) AddUserToChat(ctx context.Context, in *AddUserToChatRequest, opts ...grpc.CallOption) (*AddUserToChatResponse, error) {
+	out := new(AddUserToChatResponse)
+	err := c.cc.Invoke(ctx, UsersService_AddUserToChat_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *usersServiceClient) RemoveUserFromGroup(ctx context.Context, in *RemoveUserFromGroupRequest, opts ...grpc.CallOption) (*RemoveUserFromGroupResponse, error) {
-	out := new(RemoveUserFromGroupResponse)
-	err := c.cc.Invoke(ctx, UsersService_RemoveUserFromGroup_FullMethodName, in, out, opts...)
+func (c *usersServiceClient) RemoveUserFromChat(ctx context.Context, in *RemoveUserFromChatRequest, opts ...grpc.CallOption) (*RemoveUserFromChatResponse, error) {
+	out := new(RemoveUserFromChatResponse)
+	err := c.cc.Invoke(ctx, UsersService_RemoveUserFromChat_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *usersServiceClient) DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*DeleteGroupResponse, error) {
-	out := new(DeleteGroupResponse)
-	err := c.cc.Invoke(ctx, UsersService_DeleteGroup_FullMethodName, in, out, opts...)
+func (c *usersServiceClient) DeleteChat(ctx context.Context, in *DeleteChatRequest, opts ...grpc.CallOption) (*DeleteChatResponse, error) {
+	out := new(DeleteChatResponse)
+	err := c.cc.Invoke(ctx, UsersService_DeleteChat_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -142,11 +142,11 @@ type UsersServiceServer interface {
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
-	CreateGroup(context.Context, *CreateGroupRequest) (*CreateGroupResponse, error)
-	GetGroup(context.Context, *GetGroupRequest) (*GetGroupResponse, error)
-	AddUserToGroup(context.Context, *AddUserToGroupRequest) (*AddUserToGroupResponse, error)
-	RemoveUserFromGroup(context.Context, *RemoveUserFromGroupRequest) (*RemoveUserFromGroupResponse, error)
-	DeleteGroup(context.Context, *DeleteGroupRequest) (*DeleteGroupResponse, error)
+	CreateChat(context.Context, *CreateChatRequest) (*CreateChatResponse, error)
+	GetChat(context.Context, *GetChatRequest) (*GetChatResponse, error)
+	AddUserToChat(context.Context, *AddUserToChatRequest) (*AddUserToChatResponse, error)
+	RemoveUserFromChat(context.Context, *RemoveUserFromChatRequest) (*RemoveUserFromChatResponse, error)
+	DeleteChat(context.Context, *DeleteChatRequest) (*DeleteChatResponse, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -166,20 +166,20 @@ func (UnimplementedUsersServiceServer) UpdateUser(context.Context, *UpdateUserRe
 func (UnimplementedUsersServiceServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
 }
-func (UnimplementedUsersServiceServer) CreateGroup(context.Context, *CreateGroupRequest) (*CreateGroupResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateGroup not implemented")
+func (UnimplementedUsersServiceServer) CreateChat(context.Context, *CreateChatRequest) (*CreateChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateChat not implemented")
 }
-func (UnimplementedUsersServiceServer) GetGroup(context.Context, *GetGroupRequest) (*GetGroupResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGroup not implemented")
+func (UnimplementedUsersServiceServer) GetChat(context.Context, *GetChatRequest) (*GetChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChat not implemented")
 }
-func (UnimplementedUsersServiceServer) AddUserToGroup(context.Context, *AddUserToGroupRequest) (*AddUserToGroupResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddUserToGroup not implemented")
+func (UnimplementedUsersServiceServer) AddUserToChat(context.Context, *AddUserToChatRequest) (*AddUserToChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUserToChat not implemented")
 }
-func (UnimplementedUsersServiceServer) RemoveUserFromGroup(context.Context, *RemoveUserFromGroupRequest) (*RemoveUserFromGroupResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveUserFromGroup not implemented")
+func (UnimplementedUsersServiceServer) RemoveUserFromChat(context.Context, *RemoveUserFromChatRequest) (*RemoveUserFromChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveUserFromChat not implemented")
 }
-func (UnimplementedUsersServiceServer) DeleteGroup(context.Context, *DeleteGroupRequest) (*DeleteGroupResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteGroup not implemented")
+func (UnimplementedUsersServiceServer) DeleteChat(context.Context, *DeleteChatRequest) (*DeleteChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteChat not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 
@@ -266,92 +266,92 @@ func _UsersService_DeleteUser_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UsersService_CreateGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateGroupRequest)
+func _UsersService_CreateChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateChatRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UsersServiceServer).CreateGroup(ctx, in)
+		return srv.(UsersServiceServer).CreateChat(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UsersService_CreateGroup_FullMethodName,
+		FullMethod: UsersService_CreateChat_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).CreateGroup(ctx, req.(*CreateGroupRequest))
+		return srv.(UsersServiceServer).CreateChat(ctx, req.(*CreateChatRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UsersService_GetGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetGroupRequest)
+func _UsersService_GetChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChatRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UsersServiceServer).GetGroup(ctx, in)
+		return srv.(UsersServiceServer).GetChat(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UsersService_GetGroup_FullMethodName,
+		FullMethod: UsersService_GetChat_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).GetGroup(ctx, req.(*GetGroupRequest))
+		return srv.(UsersServiceServer).GetChat(ctx, req.(*GetChatRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UsersService_AddUserToGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddUserToGroupRequest)
+func _UsersService_AddUserToChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserToChatRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UsersServiceServer).AddUserToGroup(ctx, in)
+		return srv.(UsersServiceServer).AddUserToChat(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UsersService_AddUserToGroup_FullMethodName,
+		FullMethod: UsersService_AddUserToChat_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).AddUserToGroup(ctx, req.(*AddUserToGroupRequest))
+		return srv.(UsersServiceServer).AddUserToChat(ctx, req.(*AddUserToChatRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UsersService_RemoveUserFromGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveUserFromGroupRequest)
+func _UsersService_RemoveUserFromChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveUserFromChatRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UsersServiceServer).RemoveUserFromGroup(ctx, in)
+		return srv.(UsersServiceServer).RemoveUserFromChat(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UsersService_RemoveUserFromGroup_FullMethodName,
+		FullMethod: UsersService_RemoveUserFromChat_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).RemoveUserFromGroup(ctx, req.(*RemoveUserFromGroupRequest))
+		return srv.(UsersServiceServer).RemoveUserFromChat(ctx, req.(*RemoveUserFromChatRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UsersService_DeleteGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteGroupRequest)
+func _UsersService_DeleteChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteChatRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UsersServiceServer).DeleteGroup(ctx, in)
+		return srv.(UsersServiceServer).DeleteChat(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UsersService_DeleteGroup_FullMethodName,
+		FullMethod: UsersService_DeleteChat_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).DeleteGroup(ctx, req.(*DeleteGroupRequest))
+		return srv.(UsersServiceServer).DeleteChat(ctx, req.(*DeleteChatRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -380,24 +380,24 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UsersService_DeleteUser_Handler,
 		},
 		{
-			MethodName: "CreateGroup",
-			Handler:    _UsersService_CreateGroup_Handler,
+			MethodName: "CreateChat",
+			Handler:    _UsersService_CreateChat_Handler,
 		},
 		{
-			MethodName: "GetGroup",
-			Handler:    _UsersService_GetGroup_Handler,
+			MethodName: "GetChat",
+			Handler:    _UsersService_GetChat_Handler,
 		},
 		{
-			MethodName: "AddUserToGroup",
-			Handler:    _UsersService_AddUserToGroup_Handler,
+			MethodName: "AddUserToChat",
+			Handler:    _UsersService_AddUserToChat_Handler,
 		},
 		{
-			MethodName: "RemoveUserFromGroup",
-			Handler:    _UsersService_RemoveUserFromGroup_Handler,
+			MethodName: "RemoveUserFromChat",
+			Handler:    _UsersService_RemoveUserFromChat_Handler,
 		},
 		{
-			MethodName: "DeleteGroup",
-			Handler:    _UsersService_DeleteGroup_Handler,
+			MethodName: "DeleteChat",
+			Handler:    _UsersService_DeleteChat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

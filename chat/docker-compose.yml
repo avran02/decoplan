@@ -1,0 +1,181 @@
+services:
+  users:
+    image: avran02/decoplan-users
+    build:
+      context: ../users
+      dockerfile: dockerfile
+    environment:
+      - LOAD_DOT_ENV=false
+      - SERVER_LOG_LEVEL=${USERS_SERVER_LOG_LEVEL}
+      - SERVER_PORT=${USERS_SERVER_PORT}
+      - SERVER_HOST=${USERS_SERVER_HOST}
+      - DB_HOST=${USERS_DB_HOST}
+      - DB_PORT=${USERS_DB_PORT}
+      - DB_USER=${USERS_DB_USER}
+      - DB_PASSWORD=${USERS_DB_PASSWORD}
+      - DB_DATABASE=${USERS_DB_DATABASE}
+    # ports:
+    #   - 50051:50051
+    expose:
+      - "${USERS_SERVER_PORT}"
+    depends_on:
+      - users-postgres
+    restart: unless-stopped
+  
+  users-postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${USERS_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${USERS_POSTGRES_DB_PASSWORD}
+      POSTGRES_DB: ${USERS_POSTGRES_DB_DATABASE}
+      PGDATA: /data/postgres
+    restart: unless-stopped
+    expose:
+      - "${USERS_POSTGRES_DB_PORT}"
+
+  users-migrate:
+    image: migrate/migrate
+    volumes:
+      - ../users/migrations:/migrations
+    entrypoint: [
+      "migrate", "-path", "/migrations", "-database",
+      "postgres://${USERS_POSTGRES_DB_USER}:${USERS_POSTGRES_DB_PASSWORD}@${USERS_POSTGRES_DB_HOST}:${USERS_POSTGRES_DB_PORT}/${USERS_POSTGRES_DB_DATABASE}?sslmode=disable", "up"
+    ]
+    restart: on-failure
+    depends_on:
+      - users-postgres
+
+  chat-storage:
+    image: avran02/decoplan-chat-storage
+    build:
+      context: ../chat-storage
+      dockerfile: dockerfile
+    environment:
+      - LOAD_DOT_ENV=false
+      - SERVER_LOG_LEVEL=${CHAT_STORAGE_SERVER_LOG_LEVEL}
+      - SERVER_PORT=${CHAT_STORAGE_SERVER_PORT}
+      - SERVER_HOST=${CHAT_STORAGE_SERVER_HOST}
+      - MONGO_HOST=${CHAT_STORAGE_DB_HOST}
+      - MONGO_PORT=${CHAT_STORAGE_DB_PORT}
+      - MONGO_USER=${CHAT_STORAGE_DB_USER}
+      - MONGO_PASSWORD=${CHAT_STORAGE_DB_PASSWORD}
+      - MONGO_DATABASE=${CHAT_STORAGE_DB_DATABASE}
+      - REDIS_HOST=${CHAT_STORAGE_REDIS_HOST}
+      - REDIS_PORT=${CHAT_STORAGE_REDIS_PORT}
+      - REDIS_PASSWORD=${CHAT_STORAGE_REDIS_PASSWORD}
+    depends_on:
+      - chat-storage-mongo
+      - chat-storage-redis
+    # ports:
+    #   - "${CHAT_STORAGE_SERVER_PORT}:${CHAT_STORAGE_SERVER_PORT}"
+    expose:
+      - "${CHAT_STORAGE_SERVER_PORT}"
+    restart: unless-stopped
+
+  chat-storage-mongo:
+    image: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${CHAT_STORAGE_MONGO_DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${CHAT_STORAGE_MONGO_DB_PASSWORD}
+    # ports:
+    #   - ${CHAT_STORAGE_MONGO_DB_PORT}:27017
+    expose:
+      - "${CHAT_STORAGE_MONGO_DB_PORT}"
+    volumes:
+      - chat-storage-mongo-data:/data/mongo
+
+  # mongoexpress:
+  #   image: mongo-express
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: ${CHAT_STORAGE_MONGO_DB_USER}
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: ${CHAT_STORAGE_MONGO_DB_PASSWORD}
+  #     ME_CONFIG_MONGODB_URL: "mongodb://${CHAT_STORAGE_MONGO_DB_USER}:${CHAT_STORAGE_MONGO_DB_PASSWORD}@mongo:27017/"
+  #     ME_CONFIG_BASICAUTH: "false"
+  #   depends_on:
+  #     - chat-storage-mongo
+  #   restart: always
+
+  chat-storage-redis:
+    image: redis
+    restart: unless-stopped
+    # ports:
+    #   - ${CHAT_STORAGE_REDIS_DB_PORT}:6379
+    expose:
+      - "${CHAT_STORAGE_REDIS_DB_PORT}"
+    volumes:
+      - chat-storage-redis-data:/data/redis
+
+  # redisinsights:
+  #   image: redis/redisinsight
+  #   depends_on:
+  #     - chat-storage-redis
+  #   restart: always
+  #   ports:
+  #     - '5540:5540'
+  #   volumes:
+  #     - ./data/redisinsight:/db
+
+  auth:
+    image: avran/authentication
+    depends_on:
+      - auth-mongo
+    restart: always
+    environment:
+      - LOAD_DOT_ENV=false
+      - DB_USER=${AUTH_DB_USER}
+      - DB_PASSWORD=${AUTH_DB_PASSWORD}
+      - DB_HOST=${AUTH_DB_HOST}
+      - DB_PORT=${AUTH_DB_PORT}
+      - SERVER_HOST=${AUTH_SERVER_HOST}
+      - SERVER_PORT=${AUTH_SERVER_PORT}
+      - SERVER_LOG_LEVEL=${AUTH_SERVER_LOG_LEVEL}
+      - JWT_SECRET=${AUTH_JWT_SECRET}
+      - JWT_ACCESS_EXP=${AUTH_JWT_ACCESS_EXP}
+      - JWT_REFRESH_EXP=${AUTH_JWT_REFRESH_EXP}
+    ports:
+      - ${AUTH_SERVER_PORT}:${AUTH_SERVER_PORT}
+    expose:
+      - "${AUTH_SERVER_PORT}"
+
+  auth-mongo:
+    image: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${AUTH_MONGO_MONGO_DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${AUTH_MONGO_MONGO_DB_PASSWORD}
+    # ports:
+    #   - ${AUTH_MONGO_MONGO_DB_PORT}:27017
+    expose:
+      - "${AUTH_MONGO_MONGO_DB_PORT}"
+    volumes:
+      - auth-mongo-data:/data/mongo
+  
+  chat:
+    build: 
+      context: .
+      dockerfile: dockerfile
+    environment:
+      - LOAD_DOT_ENV=false
+      - SERVER_HOST=${CHAT_SERVER_HOST}
+      - SERVER_PORT=${CHAT_SERVER_PORT}
+      - SERVER_LOG_LEVEL=${CHAT_SERVER_LOG_LEVEL}
+      - AUTH_SERVER_URL=${AUTH_SERVER_URL}
+      - CHAT_STORAGE_SERVER_URL=${CHAT_STORAGE_SERVER_URL}
+      - USERS_SERVER_URL=${USERS_SERVER_URL}
+    depends_on:
+      - auth
+      - chat-storage
+      - users
+    expose:
+      - ${CHAT_SERVER_PORT}
+    ports:
+      - "${CHAT_SERVER_PORT}:${CHAT_SERVER_PORT}"
+    restart: unless-stopped
+
+volumes:
+  auth-mongo-data:
+  chat-storage-mongo-data:
+  chat-storage-redis-data:
