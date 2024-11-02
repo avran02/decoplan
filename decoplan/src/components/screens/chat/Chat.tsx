@@ -19,7 +19,6 @@ export function Chat({ token, chatId }: ChatProps) {
 	useEffect(() => {
 		connect()
 		fetchMessages({ chatId, limit: 100, offset: 0 })
-		console.log(messages)
 	}, [chatId, fetchMessages])
 
 	const handleSendMessage = (text: string) => {
@@ -32,7 +31,6 @@ export function Chat({ token, chatId }: ChatProps) {
 				attachments,
 			},
 		}
-		console.log(messageData)
 		sendMessage(messageData)
 		setAttachments([])
 	}
@@ -40,8 +38,6 @@ export function Chat({ token, chatId }: ChatProps) {
 	const handleAddAttachment = (attachment: IAttachment) => {
 		setAttachments((prev) => [...prev, attachment])
 	}
-
-	console.log(messages)
 	return (
 		<div
 			className='h-full grid'
