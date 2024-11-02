@@ -20,8 +20,13 @@ message Attachment {
     string url = 4;
 }
 
+message AttachmentReq {
+    string id = 1;
+    string url = 2;
+}
+
 message Message {
-    optional uint64 id = 1;
+    uint64 id = 1;
     string chat_id = 2;
     string sender = 3;
     string content = 4;
@@ -30,12 +35,20 @@ message Message {
     google.protobuf.Timestamp deleted_at = 7;
 }
 
+message MessageReq {
+    string chat_id = 1;
+    string sender = 2;
+    string content = 3;
+    repeated AttachmentReq attachments = 4;
+    google.protobuf.Timestamp created_at = 5;
+}
+
 message SaveMessageRequest {
-    Message message = 1;
+    MessageReq message = 1;
 }
 
 message SaveMessageResponse {
-    bool ok = 1;
+    Message message = 1;
 }
 
 message GetMessagesRequest {
