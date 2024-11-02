@@ -11,7 +11,7 @@ func FromModelToCacheLastMessagesResponse(model []models.Message) *pb.CacheLastM
 	}
 
 	for _, m := range model {
-		resp.Messages = append(resp.Messages, MessageModelToPB(m))
+		resp.Messages = append(resp.Messages, MessageModelToPB(m, m.ID))
 	}
 	return resp
 }
