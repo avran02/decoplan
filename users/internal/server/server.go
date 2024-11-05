@@ -48,6 +48,10 @@ func (s UsersServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) 
 	return s.UserController.UpdateUser(ctx, req)
 }
 
+func (s UsersServer) GetUserChats(ctx context.Context, req *pb.GetUserChatsRequest) (*pb.GetUserChatsResponse, error) {
+	return s.UserController.GetUserChats(ctx, req)
+}
+
 func New(controller *controller.UserController) UsersServer {
 	return UsersServer{
 		UserController: controller,

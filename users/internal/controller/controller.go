@@ -128,6 +128,30 @@ func (c *UserController) DeleteUser(ctx context.Context, req *pb.DeleteUserReque
 	return &pb.DeleteUserResponse{Ok: true}, nil
 }
 
+func (s *UserController) GetUserChats(ctx context.Context, req *pb.GetUserChatsRequest) (*pb.GetUserChatsResponse, error) {
+	slog.Info("UserController.GetUserChats")
+	chats, err := s.service.GetUserChats(ctx, req.GetUserID())
+	if err != nil {
+		return nil, err
+	}
+	chatsPb := make([]*pb.UserChat, 0)
+
+	for _, v := range chats {
+		members := make([]*pb.UserMember, 0)
+		for _, v := range v.Members {
+			members = append(members, &pb.UserMember{
+				UserID: v.ID,
+			})
+		}
+		chatsPb = append(chatsPb, &pb.UserChat{
+			ID:       v.ID,
+			ChatName: &v.Name,
+			Avatar:   v.Avatar,
+		})
+	}
+	return &pb.GetUserChatsResponse{Chats: chatsPb}, nil
+}
+
 func New(service service.UserService) *UserController {
 	return &UserController{service: service}
 }

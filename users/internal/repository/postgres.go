@@ -24,6 +24,7 @@ type Repository interface {
 	GetUser(ctx context.Context, userID string) (models.User, error)
 	UpdateUser(ctx context.Context, user models.UpdateUser) error
 	CreateUser(ctx context.Context, user models.User) error
+	GetUserChats(ctx context.Context, userID string) ([]models.Chat, error)
 }
 
 type postgres struct {
@@ -183,7 +184,6 @@ func (p *postgres) GetChat(ctx context.Context, chatID string) (*models.Chat, er
 	var chatIDOut, chatName string
 	var avatar sql.NullString
 	numRows := 0
-	slog.Info(fmt.Sprint(rows.Err()))
 	for rows.Next() {
 		numRows++
 		var userID string
@@ -202,6 +202,37 @@ func (p *postgres) GetChat(ctx context.Context, chatID string) (*models.Chat, er
 		Avatar:  &avatar.String,
 		Members: members,
 	}, nil
+}
+
+func (p *postgres) GetUserChats(ctx context.Context, userID string) ([]models.Chat, error) {
+	slog.Info("repository.GetUserChats")
+	slog.Debug("args", "userID", userID)
+	query := `SELECT c.id, c.name, c.avatar_url FROM chats c 
+			  JOIN user_chats u ON c.id = u.chat_id
+			  WHERE u.user_id = $1`
+
+	rows, err := p.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user chats: %w", err)
+	}
+	defer rows.Close()
+
+	var chats []models.Chat
+	for rows.Next() {
+		var chatID, chatName string
+		var avatar sql.NullString
+		if err := rows.Scan(&chatID, &chatName, &avatar); err != nil {
+			return nil, fmt.Errorf("failed to get user chats: %w", err)
+		}
+		chats = append(chats, models.Chat{
+			ID:      chatID,
+			Name:    chatName,
+			Avatar:  &avatar.String,
+			Members: nil,
+		})
+	}
+
+	return chats, nil
 }
 
 func New(conf config.DB) Repository {

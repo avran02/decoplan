@@ -20,6 +20,7 @@ type UserService interface {
 	DeleteUser(ctx context.Context, userID string) error
 	GetUser(ctx context.Context, userID string) (models.User, error)
 	UpdateUser(ctx context.Context, user models.UpdateUser) error
+	GetUserChats(ctx context.Context, userID string) ([]models.Chat, error)
 }
 
 type userService struct {
@@ -77,6 +78,10 @@ func (s *userService) UpdateUser(ctx context.Context, user models.UpdateUser) er
 
 func (s *userService) DeleteUser(ctx context.Context, userID string) error {
 	return s.repo.DeleteUser(ctx, userID)
+}
+
+func (s *userService) GetUserChats(ctx context.Context, userID string) ([]models.Chat, error) {
+	return s.repo.GetUserChats(ctx, userID)
 }
 
 func New(repo repository.Repository) UserService {

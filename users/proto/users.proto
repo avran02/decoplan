@@ -15,6 +15,7 @@ service UsersService {
     rpc GetChat(GetChatRequest) returns (GetChatResponse);
     rpc DeleteChat(DeleteChatRequest) returns (DeleteChatResponse);
     
+    rpc GetUserChats(GetUserChatsRequest) returns (GetUserChatsResponse);
     rpc RemoveUserFromChat(RemoveUserFromChatRequest) returns (RemoveUserFromChatResponse);
     rpc AddUserToChat(AddUserToChatRequest) returns (AddUserToChatResponse);
 }
@@ -81,6 +82,21 @@ message GetChatResponse {
 
 message UserMember {
     string userID = 1;
+}
+
+
+message GetUserChatsRequest {
+    string userID = 1;
+}
+
+message UserChat {
+    string ID = 1;
+    optional string chatName = 2;
+    optional string avatar = 3;
+}
+
+message GetUserChatsResponse {
+    repeated UserChat chats = 1;    
 }
 
 message AddUserToChatRequest {
