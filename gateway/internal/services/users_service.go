@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/avran02/decoplan/gateway/internal/models"
 	"github.com/avran02/decoplan/gateway/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -20,6 +21,7 @@ type UsersService interface {
 	GetUser(ctx context.Context, id string) (*pb.GetUserResponse, error)
 	UpdateUser(ctx context.Context, id string, name, avatar *string, birthDate *time.Time) error
 	DeleteUser(ctx context.Context, id string) error
+	GetUserChats(ctx context.Context, id string) ([]models.UserChat, error)
 }
 
 type usersService struct {
@@ -141,6 +143,27 @@ func (s *usersService) DeleteUser(ctx context.Context, id string) error {
 		return fmt.Errorf("can't make gRPC call: %w", err)
 	}
 	return nil
+}
+
+func (s *usersService) GetUserChats(ctx context.Context, id string) ([]models.UserChat, error) {
+	slog.Info("usersService.GetUserChats")
+	req := &pb.GetUserChatsRequest{
+		UserID: id,
+	}
+	resp, err := s.client.GetUserChats(ctx, req)
+	if err != nil || resp == nil {
+		return nil, fmt.Errorf("can't make gRPC call: %w", err)
+	}
+	userChats := make([]models.UserChat, 0, len(resp.Chats))
+	for _, v := range resp.Chats {
+		userChats = append(userChats, models.UserChat{
+			ID:       v.ID,
+			ChatName: v.ChatName,
+			Avatar:   v.Avatar,
+		})
+	}
+	slog.Debug("services.GetUserChats", "userID", id, "userChats", userChats)
+	return userChats, nil
 }
 
 func NewUsersService(client pb.UsersServiceClient) UsersService {

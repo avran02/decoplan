@@ -1,6 +1,10 @@
 package dto
 
-import "time"
+import (
+	"time"
+
+	"github.com/avran02/decoplan/gateway/internal/models"
+)
 
 type CreateUserRequest struct {
 	ID        string    `json:"id"`
@@ -30,4 +34,8 @@ type UpdateUserResponse struct {
 
 type DeleteUserResponse struct {
 	Ok bool `json:"ok"`
+}
+
+type GetUserChatsResponse struct {
+	Chats []models.UserChat `json:"chats"`
 }

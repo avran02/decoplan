@@ -2,10 +2,11 @@ package middleware
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"strings"
 
-	"github.com/avran02/decoplan/gateway/enum"
+	"github.com/avran02/decoplan/gateway/internal/enum"
 	"github.com/avran02/decoplan/gateway/pb"
 )
 
@@ -36,6 +37,7 @@ func (a *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
+		slog.Info("middleware.AuthMiddleware authorized", "user", resp.Id)
 
 		ctx := context.WithValue(r.Context(), enum.CtxValueUserID, resp.Id)
 		next.ServeHTTP(w, r.WithContext(ctx))

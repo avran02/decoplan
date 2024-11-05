@@ -137,6 +137,35 @@ paths:
                     type: boolean
                     example: true
 
+  /users/chats:
+    get:
+      tags:
+        - users
+      summary: Получение чатов пользователя
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Успешное получение чатов пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chats:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                          nullable: true
+                        avatar:
+                          type: string
+                          nullable: true
+                          
   /chats:
     post:
       tags:

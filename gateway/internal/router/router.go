@@ -31,6 +31,7 @@ func (router *Router) getUsersRoutes() *chi.Mux {
 		r.Get("/{id}", router.uc.GetUserHandler)
 		r.Put("/{id}", router.uc.UpdateUserHandler)
 		r.Delete("/{id}", router.uc.DeleteUserHandler)
+		r.Get("/chats", router.uc.GetUserChatsHandler)
 	})
 
 	r.Route("/chats", func(r chi.Router) {

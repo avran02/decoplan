@@ -16,6 +16,7 @@ type UsersController interface {
 	GetUserHandler(w http.ResponseWriter, r *http.Request)
 	UpdateUserHandler(w http.ResponseWriter, r *http.Request)
 	DeleteUserHandler(w http.ResponseWriter, r *http.Request)
+	GetUserChatsHandler(w http.ResponseWriter, r *http.Request)
 }
 
 type usersController struct {
@@ -105,6 +106,22 @@ func (c *usersController) DeleteUserHandler(w http.ResponseWriter, r *http.Reque
 
 	resp := dto.DeleteUserResponse{
 		Ok: true,
+	}
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		apiError(w, http.StatusInternalServerError, err)
+	}
+}
+
+func (c *usersController) GetUserChatsHandler(w http.ResponseWriter, r *http.Request) {
+	slog.Info("usersController.GetUserChats")
+	chats, err := c.s.GetUserChats(r.Context(), r.Context().Value(enum.CtxValueUserID).(string))
+	if err != nil {
+		apiError(w, http.StatusInternalServerError, fmt.Errorf("failed to make gRPC call: %w", err))
+		return
+	}
+
+	resp := dto.GetUserChatsResponse{
+		Chats: chats,
 	}
 	if err := json.NewEncoder(w).Encode(&resp); err != nil {
 		apiError(w, http.StatusInternalServerError, err)
