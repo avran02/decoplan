@@ -13,7 +13,7 @@ export interface IMessage {
   id: string;
   sender: string;
   content: IMessageContent;
-  timestamp: string;
+  createdAt: string;
 }
 
 export interface IAskMessagesDto {
@@ -24,7 +24,7 @@ export interface IAskMessagesDto {
 
 export interface IDeleteMessageDto {
   chatId: string;
-  messageId: number;
+  messageId: string;
 }
 export interface INewMessageDto {
   chatId: string;

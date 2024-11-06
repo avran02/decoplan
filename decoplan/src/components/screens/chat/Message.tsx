@@ -27,7 +27,7 @@ export function Message({ message }: { message: IMessage }) {
 							isSender ? "text-right" : "text-left"
 						}`}
 					>
-						{dayjs(message.timestamp).format("HH:mm")}
+						{dayjs(message.createdAt).format("HH:mm")}
 					</div>
 				</div>
 			</div>
