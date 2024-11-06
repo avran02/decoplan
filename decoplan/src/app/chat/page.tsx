@@ -3,7 +3,6 @@ import { Chat } from "@/components/screens/chat/Chat"
 import { getAccessToken } from "@/services/auth.helper"
 import authService from "@/services/auth.service"
 import { useMutation } from "@tanstack/react-query"
-import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function ChatPage() {
@@ -20,12 +19,12 @@ export default function ChatPage() {
 		<div className='h-screen w-screen flex flex-col'>
 			<Chat
 				token={accessToken}
-				chatId={"4a138519-2836-4ffc-acfe-e21f2558bf9d"}
+				chatId={"6c4d2071-c9c9-4432-9b90-14775b3dc708"}
 			/>
 
-			<button onClick={() => mutateLogout()}>
+			{/* <button onClick={() => mutateLogout()}>
 				<LogOut />
-			</button>
+			</button> */}
 		</div>
 	)
 }
