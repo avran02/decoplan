@@ -1,23 +1,29 @@
-// useChatWebSocket.ts
 import { WS_URL } from '@/constants/constants'
 import { IAskMessagesDto, IDeleteMessageDto, IMessage, INewMessageDto, UserMessages } from '@/types/chat.types'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 
 const useChatWebSocket = (token: string) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const { lastMessage, sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(WS_URL, {
+  const { sendJsonMessage, readyState } = useWebSocket(WS_URL, {
     onOpen: () => console.log('WebSocket Connection Opened'),
     onClose: () => console.log('WebSocket Connection Closed'),
+    onMessage: (event) => { 
+      if (event.data.length) {
+        const WSMessage = JSON.parse(event.data);
+
+        if (WSMessage.payload) {
+          // Append new messages to the existing list
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            ...(WSMessage.payload as IMessage[])
+          ]);
+        }
+      }
+    },
     queryParams: { token },
     shouldReconnect: () => true,
   });
-
-  useEffect(() => {
-    if (lastJsonMessage) {
-      setMessages(lastJsonMessage as IMessage[]);
-    }
-  }, [lastJsonMessage]);
 
   const connect = useCallback(() => {
     if (readyState !== ReadyState.OPEN) {
@@ -31,17 +37,19 @@ const useChatWebSocket = (token: string) => {
     }
   }, [readyState, sendJsonMessage]);
 
-  const sendMessage = useCallback((messageData: INewMessageDto) => {
+  const sendMessage = (messageData: INewMessageDto) => {
     sendJsonMessage({ act: UserMessages.USER_SEND_MESSAGE, payload: messageData });
-  }, [sendJsonMessage]);
+  };
 
-  const fetchMessages = useCallback((data: IAskMessagesDto) => {
+  const fetchMessages = (data: IAskMessagesDto) => {
     sendJsonMessage({ act: UserMessages.USER_GET_MESSAGES, payload: data });
-  }, [sendJsonMessage]);
+  };
 
-  const deleteMessage = useCallback((data: IDeleteMessageDto) => {
+  const deleteMessage = (data: IDeleteMessageDto) => {
     sendJsonMessage({ act: UserMessages.USER_DELETE_MESSAGE, payload: data });
-  }, [sendJsonMessage]);
+    // Locally remove the message after deletion
+    setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== data.messageId));
+  };
 
   return {
     messages,
