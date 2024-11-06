@@ -1,11 +1,21 @@
-import cn from 'clsx'
-import { forwardRef } from 'react'
+import cn from "clsx"
+import { forwardRef, useEffect, useRef } from "react"
 
-import styles from './Field.module.scss'
-import { TypeInputProps } from './field.types'
+import styles from "./Field.module.scss"
+import { TypeInputProps } from "./field.types"
 
-const Field = forwardRef<HTMLInputElement, TypeInputProps>(
-	({ error, style, Icon, className, ...rest }, ref) => {
+const Field = forwardRef<HTMLTextAreaElement, TypeInputProps>(
+	({ error, style, Icon, className, value, onChange, ...rest }, ref) => {
+		const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+		useEffect(() => {
+			const textarea = textareaRef.current
+			if (textarea) {
+				textarea.style.height = "auto"
+				textarea.style.height = `${textarea.scrollHeight}px`
+			}
+		}, [value])
+
 		return (
 			<label className={cn(styles.field, className)} style={style}>
 				{Icon && (
@@ -13,13 +23,19 @@ const Field = forwardRef<HTMLInputElement, TypeInputProps>(
 						<Icon />
 					</div>
 				)}
-				<input ref={ref} {...rest} />
+				<textarea
+					ref={(ref as any) || textareaRef}
+					value={value}
+					onChange={onChange}
+					className={styles.textarea}
+					{...rest}
+				/>
 				{error && <div className={styles.error}>{error.message}</div>}
 			</label>
 		)
 	}
 )
 
-Field.displayName = 'Field'
+Field.displayName = "Field"
 
 export default Field

@@ -17,14 +17,23 @@ export function MessageField({ onSendMessage }: IMessageField) {
 		}
 	}
 
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (e.key === "Enter" && !e.shiftKey) {
+			e.preventDefault()
+			onSubmit()
+		}
+	}
+
 	return (
-		<div className='border-t border-border p-layout flex items-center justify-between'>
+		<div className='border-t border-border p-layout flex items-center w-full justify-between bottom-0'>
 			<Field
 				className='w-full'
 				placeholder='Write a message...'
 				Icon={ArrowRightToLine}
 				value={message}
 				onChange={(e) => setMessage(e.target.value)}
+				onKeyDown={handleKeyDown}
+				rows={1}
 			/>
 			<button
 				className='hover:text-primary transition-colors'
