@@ -163,7 +163,7 @@ func (hub *websocketHub) userSendMessageController(conn *websocket.Conn, payload
 	}
 
 	addr := conn.RemoteAddr().String()
-	hub.broadcastMessage(resp, req.ChatID, hub.clientConnections[addr].UserID, true)
+	hub.broadcastMessage(resp, req.ChatID, hub.clientConnections[addr].UserID, false)
 }
 
 func (hub *websocketHub) userDeleteMessageController(conn *websocket.Conn, payload []byte) {
