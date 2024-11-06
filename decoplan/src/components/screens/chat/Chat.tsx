@@ -16,7 +16,6 @@ export function Chat({ token, chatId }: ChatProps) {
 	const isLoading = false
 	const [attachments, setAttachments] = useState<IAttachment[]>([])
 
-	// Добавляем реф для контейнера сообщений
 	const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
 	useEffect(() => {
@@ -24,12 +23,11 @@ export function Chat({ token, chatId }: ChatProps) {
 		fetchMessages({ chatId, limit: 100, offset: 0 })
 	}, [chatId])
 
-	// Прокручиваем до последнего сообщения при изменении списка сообщений
 	useEffect(() => {
 		if (messagesEndRef.current) {
 			messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
 		}
-	}, [messages]) // Зависимость на сообщения
+	}, [messages])
 
 	const handleSendMessage = (text: string) => {
 		const timestamp = new Date().toISOString()
@@ -64,7 +62,6 @@ export function Chat({ token, chatId }: ChatProps) {
 						{messages.map((message, i) => (
 							<Message key={i} message={message} />
 						))}
-						{/* Добавляем скрытый элемент, чтобы прокручивать к последнему сообщению */}
 						<div ref={messagesEndRef} />
 					</div>
 				</>
