@@ -1,7 +1,7 @@
 import { Loader } from "@/components/ui/loader/Loader"
 import useChatWebSocket from "@/hooks/useChatWebSocket"
 import { IAttachment, INewMessageDto } from "@/types/chat.types"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Message } from "./Message"
 import { MessageField } from "./MessageField"
 
@@ -16,10 +16,20 @@ export function Chat({ token, chatId }: ChatProps) {
 	const isLoading = false
 	const [attachments, setAttachments] = useState<IAttachment[]>([])
 
+	// Добавляем реф для контейнера сообщений
+	const messagesEndRef = useRef<HTMLDivElement | null>(null)
+
 	useEffect(() => {
 		connect()
 		fetchMessages({ chatId, limit: 100, offset: 0 })
-	}, [chatId, fetchMessages])
+	}, [chatId])
+
+	// Прокручиваем до последнего сообщения при изменении списка сообщений
+	useEffect(() => {
+		if (messagesEndRef.current) {
+			messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+		}
+	}, [messages]) // Зависимость на сообщения
 
 	const handleSendMessage = (text: string) => {
 		const timestamp = new Date().toISOString()
@@ -50,10 +60,12 @@ export function Chat({ token, chatId }: ChatProps) {
 			) : (
 				<>
 					{/* <ChatHeader correspondent={correspondent} /> */}
-					<div className='p-layout border-t border-border'>
+					<div className='p-layout border-t border-border	overflow-y-auto'>
 						{messages.map((message, i) => (
 							<Message key={i} message={message} />
 						))}
+						{/* Добавляем скрытый элемент, чтобы прокручивать к последнему сообщению */}
+						<div ref={messagesEndRef} />
 					</div>
 				</>
 			)}
