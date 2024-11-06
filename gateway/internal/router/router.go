@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/avran02/decoplan/gateway/internal/config"
 	"github.com/avran02/decoplan/gateway/internal/controllers"
 	authMiddleware "github.com/avran02/decoplan/gateway/internal/middleware"
 	"github.com/avran02/decoplan/gateway/pb"
@@ -48,7 +49,7 @@ func (router *Router) getUsersRoutes() *chi.Mux {
 	return r
 }
 
-func New(controller *controllers.Controller, authClient pb.AuthServiceClient) Router {
+func New(controller *controllers.Controller, authClient pb.AuthServiceClient, corsConf config.CORS) Router {
 	r := Router{
 		cc: controller.ChatsController(),
 		uc: controller.UsersController(),
@@ -57,7 +58,7 @@ func New(controller *controllers.Controller, authClient pb.AuthServiceClient) Ro
 
 	main := chi.NewRouter()
 	main.Use(middleware.Logger)
-	main.Use(cors.Handler(allowAllCORS()))
+	main.Use(cors.Handler(getCorsOptions(corsConf)))
 
 	usersRoutes := r.getUsersRoutes()
 	main.Mount("/api/v1", usersRoutes)

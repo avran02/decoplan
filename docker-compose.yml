@@ -40,6 +40,9 @@ services:
       - USERS_SERVER_URL=${GATEWAY_USERS_SERVER_URL}
     # ports:
     #   - 3000:3000
+    volumes:
+      - ./gateway/config.yml:/root/config.yml
+
     expose:
       - "${GATEWAY_SERVER_PORT}"
     depends_on:

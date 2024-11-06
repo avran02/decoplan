@@ -35,9 +35,10 @@ func (a *App) Run() error {
 func New() *App {
 	conf := config.New()
 	logger.Setup(conf.Server)
+	slog.Debug(fmt.Sprintf("config: %+v", conf))
 	srv := services.NewUsersService(connectUsersService(conf.ExternalServices.UsersServiceUrl))
 	controller := controllers.New(srv)
-	router := router.New(controller, connectAuthService(conf.ExternalServices.AuthServiceUrl))
+	router := router.New(controller, connectAuthService(conf.ExternalServices.AuthServiceUrl), conf.CORS)
 
 	return &App{
 		config: conf,
