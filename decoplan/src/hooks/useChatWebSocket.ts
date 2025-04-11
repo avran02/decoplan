@@ -13,11 +13,13 @@ const useChatWebSocket = (token: string) => {
         const WSMessage = JSON.parse(event.data);
 
         if (WSMessage.payload) {
-          // Append new messages to the existing list
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            ...(WSMessage.payload as IMessage[])
-          ]);
+          setMessages((prevMessages) => {
+            const newMessages = WSMessage.payload as IMessage[];
+            const existingIds = new Set(prevMessages.map(msg => msg.id));
+            const filteredMessages = newMessages.filter(msg => !existingIds.has(msg.id));
+            
+            return [...prevMessages, ...filteredMessages];
+          });
         }
       }
     },

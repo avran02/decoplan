@@ -1,4 +1,4 @@
-import { axiosClassic } from '@/api/axios'
+import { instance } from '@/api/axiosAuth'
 import { IFormLogin, IFormRegister } from '@/types/auth.types'
 import { getAccessToken, removeFromStorage, saveTokenStorage } from './auth.helper'
 
@@ -14,7 +14,7 @@ export enum EnumTokens {
 
 class AuthService {
 	async login( data: IFormLogin ) {
-		const response = await axiosClassic.post<IAuthResponse>(
+		const response = await instance.post<IAuthResponse>(
 			`/login`,
 			data
 		)
@@ -26,7 +26,7 @@ class AuthService {
 	}
 
 	async register( data: IFormRegister ) {
-		const response = await axiosClassic.post<IAuthResponse>(
+		const response = await instance.post<IAuthResponse>(
 			`/register`,
 			data
 		)
@@ -39,7 +39,7 @@ class AuthService {
 
 
 	async getNewTokens() {
-		const response = await axiosClassic.post<IAuthResponse>(
+		const response = await instance.post<IAuthResponse>(
 			'/refresh-tokens',
 			{},
 			{
@@ -53,7 +53,7 @@ class AuthService {
 		const accessToken = getAccessToken()
 		console.log(accessToken);
 		
-		const response = await axiosClassic.post<boolean>('/logout', 
+		const response = await instance.post<boolean>('/logout', 
 			{"accessToken" : accessToken}
 		)
 		console.log(response)
