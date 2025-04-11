@@ -1,3 +1,4 @@
+
 // types.ts
 export interface IAttachment {
   id: string;
@@ -30,6 +31,16 @@ export interface INewMessageDto {
   chatId: string;
   content: IMessageContent;
   timestamp: string;
+}
+
+export interface IChatResponse {
+	chats: IChat[]
+}
+
+export interface IChat {
+  id: string
+  chatName: string
+  avatar: string
 }
 
 
