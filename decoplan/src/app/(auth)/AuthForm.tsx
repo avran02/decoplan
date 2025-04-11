@@ -47,7 +47,7 @@ export function AuthForm({ isLogin }: AuthFormProps) {
 		},
 		onSuccess() {
 			reset()
-			router.push("/chat")
+			router.push("/register/v2")
 			toast.success("Registration successful")
 		},
 	})
