@@ -1,12 +1,8 @@
 .field {
 	@apply flex items-center relative;
 
-	> .textarea {
-		@apply w-full border-none outline-none bg-transparent placeholder:text-[#585654] transition-colors duration-300 ease-linear;
-		resize: none;
-		overflow: hidden;
-		padding: 0.5rem;
-		font-size: 1rem;
+	> input {
+		@apply border-none outline-none bg-transparent placeholder:text-[#585654] transition-colors duration-300 ease-linear;
 	}
 
 	&:focus-within {
